@@ -1,0 +1,40 @@
+#pragma once
+
+#include "AudioFifo.hpp"
+#include <portaudio.h>
+
+/**
+ * @class AudioRecorder
+ * @brief Audio recording class using PortAudio.
+ *
+ * AudioRecorder continuously captures audio from the default
+ * input device and pushes 10 ms audio blocks into an AudioFifo.
+ */
+class AudioRecorder {
+private:
+    /**
+     * @brief Reference to the shared audio FIFO.
+     */
+    AudioFifo& fifo;
+
+    /**
+     * @brief PortAudio input stream.
+     */
+    PaStream* stream = nullptr;
+
+public:
+    /**
+     * @brief Constructs an AudioRecorder.
+     *
+     * @param fifo Reference to the audio FIFO used to store recorded audio.
+     */
+    explicit AudioRecorder(AudioFifo& fifo);
+
+    /**
+     * @brief Starts the recording loop.
+     *
+     * Opens the PortAudio input stream and continuously records
+     * audio blocks into the FIFO.
+     */
+    void start();
+};
