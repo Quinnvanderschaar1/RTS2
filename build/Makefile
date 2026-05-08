@@ -153,6 +153,30 @@ src/AudioFifo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioFifo.cpp.s
 .PHONY : src/AudioFifo.cpp.s
 
+src/AudioMixer.o: src/AudioMixer.cpp.o
+.PHONY : src/AudioMixer.o
+
+# target to build an object file
+src/AudioMixer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o
+.PHONY : src/AudioMixer.cpp.o
+
+src/AudioMixer.i: src/AudioMixer.cpp.i
+.PHONY : src/AudioMixer.i
+
+# target to preprocess a source file
+src/AudioMixer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioMixer.cpp.i
+.PHONY : src/AudioMixer.cpp.i
+
+src/AudioMixer.s: src/AudioMixer.cpp.s
+.PHONY : src/AudioMixer.s
+
+# target to generate assembly for a file
+src/AudioMixer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioMixer.cpp.s
+.PHONY : src/AudioMixer.cpp.s
+
 src/AudioPlayer.o: src/AudioPlayer.cpp.o
 .PHONY : src/AudioPlayer.o
 
@@ -201,6 +225,54 @@ src/AudioRecorder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioRecorder.cpp.s
 .PHONY : src/AudioRecorder.cpp.s
 
+src/UdpReceiver.o: src/UdpReceiver.cpp.o
+.PHONY : src/UdpReceiver.o
+
+# target to build an object file
+src/UdpReceiver.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o
+.PHONY : src/UdpReceiver.cpp.o
+
+src/UdpReceiver.i: src/UdpReceiver.cpp.i
+.PHONY : src/UdpReceiver.i
+
+# target to preprocess a source file
+src/UdpReceiver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.i
+.PHONY : src/UdpReceiver.cpp.i
+
+src/UdpReceiver.s: src/UdpReceiver.cpp.s
+.PHONY : src/UdpReceiver.s
+
+# target to generate assembly for a file
+src/UdpReceiver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.s
+.PHONY : src/UdpReceiver.cpp.s
+
+src/UdpSender.o: src/UdpSender.cpp.o
+.PHONY : src/UdpSender.o
+
+# target to build an object file
+src/UdpSender.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpSender.cpp.o
+.PHONY : src/UdpSender.cpp.o
+
+src/UdpSender.i: src/UdpSender.cpp.i
+.PHONY : src/UdpSender.i
+
+# target to preprocess a source file
+src/UdpSender.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpSender.cpp.i
+.PHONY : src/UdpSender.cpp.i
+
+src/UdpSender.s: src/UdpSender.cpp.s
+.PHONY : src/UdpSender.s
+
+# target to generate assembly for a file
+src/UdpSender.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/UdpSender.cpp.s
+.PHONY : src/UdpSender.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -237,12 +309,21 @@ help:
 	@echo "... src/AudioFifo.o"
 	@echo "... src/AudioFifo.i"
 	@echo "... src/AudioFifo.s"
+	@echo "... src/AudioMixer.o"
+	@echo "... src/AudioMixer.i"
+	@echo "... src/AudioMixer.s"
 	@echo "... src/AudioPlayer.o"
 	@echo "... src/AudioPlayer.i"
 	@echo "... src/AudioPlayer.s"
 	@echo "... src/AudioRecorder.o"
 	@echo "... src/AudioRecorder.i"
 	@echo "... src/AudioRecorder.s"
+	@echo "... src/UdpReceiver.o"
+	@echo "... src/UdpReceiver.i"
+	@echo "... src/UdpReceiver.s"
+	@echo "... src/UdpSender.o"
+	@echo "... src/UdpSender.i"
+	@echo "... src/UdpSender.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

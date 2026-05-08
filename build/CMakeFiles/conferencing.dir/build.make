@@ -125,12 +125,57 @@ CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/AudioPlayer.cpp -o CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.s
 
+CMakeFiles/conferencing.dir/src/UdpSender.cpp.o: CMakeFiles/conferencing.dir/flags.make
+CMakeFiles/conferencing.dir/src/UdpSender.cpp.o: /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpSender.cpp
+CMakeFiles/conferencing.dir/src/UdpSender.cpp.o: CMakeFiles/conferencing.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/conferencing.dir/src/UdpSender.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/conferencing.dir/src/UdpSender.cpp.o -MF CMakeFiles/conferencing.dir/src/UdpSender.cpp.o.d -o CMakeFiles/conferencing.dir/src/UdpSender.cpp.o -c /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpSender.cpp
+
+CMakeFiles/conferencing.dir/src/UdpSender.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/conferencing.dir/src/UdpSender.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpSender.cpp > CMakeFiles/conferencing.dir/src/UdpSender.cpp.i
+
+CMakeFiles/conferencing.dir/src/UdpSender.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/conferencing.dir/src/UdpSender.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpSender.cpp -o CMakeFiles/conferencing.dir/src/UdpSender.cpp.s
+
+CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o: CMakeFiles/conferencing.dir/flags.make
+CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o: /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpReceiver.cpp
+CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o: CMakeFiles/conferencing.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o -MF CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o.d -o CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o -c /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpReceiver.cpp
+
+CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpReceiver.cpp > CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.i
+
+CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/UdpReceiver.cpp -o CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.s
+
+CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o: CMakeFiles/conferencing.dir/flags.make
+CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o: /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/AudioMixer.cpp
+CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o: CMakeFiles/conferencing.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o -MF CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o.d -o CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o -c /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/AudioMixer.cpp
+
+CMakeFiles/conferencing.dir/src/AudioMixer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/conferencing.dir/src/AudioMixer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/AudioMixer.cpp > CMakeFiles/conferencing.dir/src/AudioMixer.cpp.i
+
+CMakeFiles/conferencing.dir/src/AudioMixer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/conferencing.dir/src/AudioMixer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/src/AudioMixer.cpp -o CMakeFiles/conferencing.dir/src/AudioMixer.cpp.s
+
 # Object files for target conferencing
 conferencing_OBJECTS = \
 "CMakeFiles/conferencing.dir/src/main.cpp.o" \
 "CMakeFiles/conferencing.dir/src/AudioFifo.cpp.o" \
 "CMakeFiles/conferencing.dir/src/AudioRecorder.cpp.o" \
-"CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.o"
+"CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.o" \
+"CMakeFiles/conferencing.dir/src/UdpSender.cpp.o" \
+"CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o" \
+"CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o"
 
 # External object files for target conferencing
 conferencing_EXTERNAL_OBJECTS =
@@ -139,9 +184,12 @@ conferencing: CMakeFiles/conferencing.dir/src/main.cpp.o
 conferencing: CMakeFiles/conferencing.dir/src/AudioFifo.cpp.o
 conferencing: CMakeFiles/conferencing.dir/src/AudioRecorder.cpp.o
 conferencing: CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.o
+conferencing: CMakeFiles/conferencing.dir/src/UdpSender.cpp.o
+conferencing: CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o
+conferencing: CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o
 conferencing: CMakeFiles/conferencing.dir/build.make
 conferencing: CMakeFiles/conferencing.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable conferencing"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/quinn/MEGA/Career/Robotics/Master/5B/RTS2/project/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable conferencing"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/conferencing.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

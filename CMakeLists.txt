@@ -15,6 +15,9 @@ add_executable(conferencing
     src/AudioFifo.cpp
     src/AudioRecorder.cpp
     src/AudioPlayer.cpp
+    src/UdpSender.cpp
+    src/UdpReceiver.cpp
+    src/AudioMixer.cpp
 )
 
 target_include_directories(conferencing PRIVATE
