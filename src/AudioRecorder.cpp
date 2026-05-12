@@ -8,7 +8,7 @@ constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 AudioRecorder::AudioRecorder(AudioFifo& fifo) : fifo(fifo) {}
 
 void AudioRecorder::start() {
-    Pa_OpenDefaultStream(
+   paNoError err = Pa_OpenDefaultStream(
         &stream,
         CHANNELS,
         0,
@@ -18,6 +18,11 @@ void AudioRecorder::start() {
         nullptr,
         nullptr
     );
+
+    if (err != paNoError) {
+         fprintf(stderr, "Failed to open audio stream: %s\n", Pa_GetErrorText(err));
+         return;
+     }
 
     Pa_StartStream(stream);
 
