@@ -19,6 +19,7 @@ add_executable(conferencing
     src/UdpSender.cpp
     src/UdpReceiver.cpp
     src/AudioMixer.cpp
+    src/AudioProcessing.cpp
 )
 
 target_include_directories(conferencing PRIVATE

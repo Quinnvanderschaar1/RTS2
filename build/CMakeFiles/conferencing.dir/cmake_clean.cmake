@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/conferencing.dir/src/AudioMixer.cpp.o.d"
   "CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.o"
   "CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.o.d"
+  "CMakeFiles/conferencing.dir/src/AudioProcessing.cpp.o"
+  "CMakeFiles/conferencing.dir/src/AudioProcessing.cpp.o.d"
   "CMakeFiles/conferencing.dir/src/AudioRecorder.cpp.o"
   "CMakeFiles/conferencing.dir/src/AudioRecorder.cpp.o.d"
   "CMakeFiles/conferencing.dir/src/UdpReceiver.cpp.o"

@@ -201,6 +201,30 @@ src/AudioPlayer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioPlayer.cpp.s
 .PHONY : src/AudioPlayer.cpp.s
 
+src/AudioProcessing.o: src/AudioProcessing.cpp.o
+.PHONY : src/AudioProcessing.o
+
+# target to build an object file
+src/AudioProcessing.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioProcessing.cpp.o
+.PHONY : src/AudioProcessing.cpp.o
+
+src/AudioProcessing.i: src/AudioProcessing.cpp.i
+.PHONY : src/AudioProcessing.i
+
+# target to preprocess a source file
+src/AudioProcessing.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioProcessing.cpp.i
+.PHONY : src/AudioProcessing.cpp.i
+
+src/AudioProcessing.s: src/AudioProcessing.cpp.s
+.PHONY : src/AudioProcessing.s
+
+# target to generate assembly for a file
+src/AudioProcessing.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/conferencing.dir/build.make CMakeFiles/conferencing.dir/src/AudioProcessing.cpp.s
+.PHONY : src/AudioProcessing.cpp.s
+
 src/AudioRecorder.o: src/AudioRecorder.cpp.o
 .PHONY : src/AudioRecorder.o
 
@@ -339,6 +363,9 @@ help:
 	@echo "... src/AudioPlayer.o"
 	@echo "... src/AudioPlayer.i"
 	@echo "... src/AudioPlayer.s"
+	@echo "... src/AudioProcessing.o"
+	@echo "... src/AudioProcessing.i"
+	@echo "... src/AudioProcessing.s"
 	@echo "... src/AudioRecorder.o"
 	@echo "... src/AudioRecorder.i"
 	@echo "... src/AudioRecorder.s"
