@@ -14,7 +14,7 @@ constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 
-constexpr const char* UDP_GROUP = "172.18.0.1";
+constexpr const char* UDP_GROUP = "192.168.50.138";
 constexpr uint16_t UDP_PORT = 5005;
 
 struct NetworkSenderArgs {
