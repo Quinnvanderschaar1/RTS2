@@ -12,6 +12,7 @@ pkg_check_modules(PORTAUDIO REQUIRED portaudio-2.0)
 
 add_executable(conferencing
     src/main.cpp
+    src/UserInterface.cpp
     src/AudioFifo.cpp
     src/AudioRecorder.cpp
     src/AudioPlayer.cpp

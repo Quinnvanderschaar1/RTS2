@@ -4,11 +4,13 @@
 #include "UdpSender.hpp"
 #include "UdpReceiver.hpp"
 #include "AudioMixer.hpp"
+#include "UserInterface.hpp"
 
 #include <pthread.h>
 #include <portaudio.h>
 #include <vector>
 #include <iostream>
+#include <unistd.h>
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
@@ -17,9 +19,13 @@ constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 constexpr const char* UDP_GROUP = "192.168.50.138";
 constexpr uint16_t UDP_PORT = 5005;
 
+constexpr int BUTTON_GPIO = 17;
+constexpr int LED_GPIO = 27;
+
 struct NetworkSenderArgs {
     AudioFifo* micFifo;
     UdpSender* sender;
+    UserInterface* ui;
 };
 
 struct NetworkReceiverArgs {
@@ -51,10 +57,14 @@ void* network_sender_thread(void* arg) {
 
     while (true) {
         std::vector<float> micBlock = args->micFifo->pop();
-        args->sender->sendData(micBlock);
 
-        // Put mic data back so the mixer can also use it
-        args->micFifo->push(micBlock);
+        bool pressed = args->ui->isButtonPressed();
+
+        args->ui->setLed(pressed);
+
+        if (pressed) {
+            args->sender->sendData(micBlock);
+        }
     }
 
     return nullptr;
@@ -107,10 +117,12 @@ int main() {
     UdpReceiver receiver(UDP_GROUP, UDP_PORT);
 
     AudioMixer mixer;
+    UserInterface ui(BUTTON_GPIO, LED_GPIO);
 
     NetworkSenderArgs senderArgs{
         &micFifo,
-        &sender
+        &sender,
+        &ui
     };
 
     NetworkReceiverArgs receiverArgs{
