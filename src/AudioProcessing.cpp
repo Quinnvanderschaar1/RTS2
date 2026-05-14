@@ -1,4 +1,5 @@
 #include "AudioProcessing.hpp"
+#include <cstddef>
 
 std::vector<float> AudioProcessing::lowPass(
     const std::vector<float>& input,
