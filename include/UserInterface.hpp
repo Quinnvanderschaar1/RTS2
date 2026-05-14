@@ -13,12 +13,15 @@ private:
     int buttonGpio;
     int ledGpio;
 
+    bool keyboardEnabled = true;
+
     void exportGpio(int gpio);
     void unexportGpio(int gpio);
     void setDirection(int gpio, const std::string& direction);
     void writeGpio(int gpio, int value);
     int readGpio(int gpio);
 
+    bool isKeyboardPressed();
 public:
     /**
      * @brief Constructs the user interface.
