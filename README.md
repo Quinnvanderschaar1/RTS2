@@ -25,5 +25,5 @@ make
 
 ## Running
 ```
-
+./conferencing ip_address_other_device
 ``
