@@ -2,22 +2,28 @@
 
 #include <queue>
 #include <vector>
+#include <cstdint>
 #include <pthread.h>
 
 /**
  * @class AudioFifo
  * @brief Thread-safe FIFO queue for audio blocks.
  *
- * AudioFifo stores audio buffers as vectors of floating-point samples.
+ * AudioFifo stores timestamped audio blocks (capture time + samples).
  * It is intended for producer/consumer use, for example one thread recording
  * audio and another thread playing it back.
  */
+struct AudioBlock {
+    uint64_t captureNs{0};
+    std::vector<float> samples;
+};
+
 class AudioFifo {
 private:
     /**
      * @brief Queue containing audio blocks.
      */
-    std::queue<std::vector<float>> queue;
+    std::queue<AudioBlock> queue;
 
     /**
      * @brief Mutex protecting access to the FIFO queue.
@@ -45,7 +51,7 @@ public:
      *
      * @param block Audio block to add to the queue.
      */
-    void push(const std::vector<float>& block);
+    void push(const AudioBlock& block);
 
     /**
      * @brief Removes and returns the oldest audio block from the FIFO.
@@ -54,5 +60,5 @@ public:
      *
      * @return The oldest audio block in the queue.
      */
-    std::vector<float> pop();
+    AudioBlock pop();
 };

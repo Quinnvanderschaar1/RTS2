@@ -4,7 +4,10 @@ constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 
+
 AudioPlayer::AudioPlayer(AudioFifo& fifo) : fifo(fifo) {}
+
+AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* /*e2e*/) : fifo(fifo) {}
 
 void AudioPlayer::start() {
     Pa_OpenDefaultStream(
@@ -21,7 +24,7 @@ void AudioPlayer::start() {
     Pa_StartStream(stream);
 
     while (true) {
-        auto buffer = fifo.pop();
-        Pa_WriteStream(stream, buffer.data(), FRAMES_10MS);
+        AudioBlock block = fifo.pop();
+        Pa_WriteStream(stream, block.samples.data(), FRAMES_10MS);
     }
 }

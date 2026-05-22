@@ -1,11 +1,14 @@
 #include "AudioRecorder.hpp"
 #include <vector>
+#include <chrono>
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 
 AudioRecorder::AudioRecorder(AudioFifo& fifo) : fifo(fifo) {}
+
+AudioRecorder::AudioRecorder(AudioFifo& fifo, WCETStats* /*e2e*/) : fifo(fifo) {}
 
 void AudioRecorder::start() {
     Pa_OpenDefaultStream(
@@ -25,6 +28,10 @@ void AudioRecorder::start() {
 
     while (true) {
         Pa_ReadStream(stream, buffer.data(), FRAMES_10MS);
-        fifo.push(buffer);
+        AudioBlock block;
+        auto tnow = std::chrono::steady_clock::now();
+        block.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(tnow.time_since_epoch()).count();
+        block.samples = buffer;
+        fifo.push(block);
     }
 }

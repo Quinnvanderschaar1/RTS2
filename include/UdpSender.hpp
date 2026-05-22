@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "AudioFifo.hpp"
 
 /**
  * @class UdpSender
@@ -20,4 +21,5 @@ public:
 
     void sendMessage(const std::string& message);
     void sendData(const std::vector<float>& data);
+    void sendBlock(const AudioBlock& block);
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AudioFifo.hpp"
+#include "wcet.hpp"
 #include <portaudio.h>
 
 /**
@@ -29,6 +30,8 @@ public:
      * @param fifo Reference to the audio FIFO used to store recorded audio.
      */
     explicit AudioRecorder(AudioFifo& fifo);
+
+    explicit AudioRecorder(AudioFifo& fifo, WCETStats* e2eStats);
 
     /**
      * @brief Starts the recording loop.

@@ -1,137 +1,183 @@
-#include "AudioFifo.hpp"
+﻿#include "AudioFifo.hpp"
+#ifndef USE_SIMULATION
 #include "AudioRecorder.hpp"
 #include "AudioPlayer.hpp"
+#endif
 #include "UserInterface.hpp"
 #include "UdpSender.hpp"
 #include "UdpReceiver.hpp"
+#include "AudioMixer.hpp"
+#include "AudioProcessing.hpp"
+#include "SimulatedAudio.hpp"
+#include "SimulatedUI.hpp"
+#include "Transceiver.hpp"
+#include "wcet.hpp"
 
-#include <pthread.h>
-#include <portaudio.h>
-#include <vector>
+#include <chrono>
+#include <cstring>
+#include <functional>
 #include <iostream>
+#include <thread>
+#include <vector>
 #include <cstdint>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
+#ifndef USE_SIMULATION
+#include <portaudio.h>
+#endif
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
-
 constexpr const char* UDP_GROUP = "192.168.50.189";
 constexpr uint16_t UDP_PORT = 5005;
-
 constexpr int BUTTON_GPIO = 17;
 constexpr int LED_GPIO = 27;
 
-struct TransceiverArgs {
-    AudioFifo* micFifo;
-    AudioFifo* playbackFifo;
-    UserInterface* ui;
-    UdpSender* sender;
-    UdpReceiver* receiver;
-};
-
-void* recorder_thread(void* arg) {
-    static_cast<AudioRecorder*>(arg)->start();
-    return nullptr;
-}
-
-void* player_thread(void* arg) {
-    static_cast<AudioPlayer*>(arg)->start();
-    return nullptr;
-}
-
-void* transmit_thread(void* arg) {
-    auto* args = static_cast<TransceiverArgs*>(arg);
-
-    while (true) {
-        std::vector<float> micBlock = args->micFifo->pop();
-
-        bool active = args->ui->isButtonPressed();
-        args->ui->setLed(active);
-
-        if (active) {
-            args->sender->sendData(micBlock);
-        }
-    }
-
-    return nullptr;
-}
-
-void* receive_thread(void* arg) {
-    auto* args = static_cast<TransceiverArgs*>(arg);
-
-    int receivedCount = 0;
-
-    while (true) {
-        std::vector<float> remoteBlock =
-            args->receiver->receiveFloatData(FRAMES_10MS * CHANNELS);
-
-        if (!remoteBlock.empty()) {
-            args->playbackFifo->push(remoteBlock);
-
-            receivedCount++;
-
-            if (receivedCount % 100 == 0) {
-                std::cout << "Received audio packets: "
-                          << receivedCount
-                          << " | samples: "
-                          << remoteBlock.size()
-                          << std::endl;
-            }
-        }
-    }
-
-    return nullptr;
-}
-
 int main(int argc, char* argv[]) {
-    const char* udpGroup = UDP_GROUP;
+    bool simulationMode = true;
+    std::string udpGroup = UDP_GROUP;
+    bool useUdp = true; // default: include UDP in simulation
+    bool userSpecifiedUdp = false;
 
-    if (argc >= 2) {
-        udpGroup = argv[1];
+    auto hasPrefix = [](const std::string& value, const std::string& prefix) {
+        return value.size() >= prefix.size() && value.compare(0, prefix.size(), prefix) == 0;
+    };
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "--hw") {
+            simulationMode = false;
+        } else if (arg == "--sim") {
+            simulationMode = true;
+        } else if (arg == "--no-udp") {
+            useUdp = false;
+        } else if (!hasPrefix(arg, "--")) {
+            udpGroup = arg;
+            userSpecifiedUdp = true;
+            simulationMode = false;
+        }
     }
 
-    std::cout << "Using UDP address: " << udpGroup << std::endl;
-
-    Pa_Initialize();
+    std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
+    if (!simulationMode) {
+        std::cout << "Using UDP address: " << udpGroup << std::endl;
+    } else {
+        std::cout << "Simulation active: microphone and playback are both simulated." << std::endl;
+        std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
+    }
 
     AudioFifo micFifo;
     AudioFifo playbackFifo;
 
-    AudioRecorder recorder(micFifo);
-    AudioPlayer player(playbackFifo);
+#ifndef USE_SIMULATION
+    std::unique_ptr<AudioRecorder> recorder;
+    std::unique_ptr<AudioPlayer> player;
+#endif
+    std::unique_ptr<AudioRecorderSimulator> recorderSim;
+    std::unique_ptr<AudioPlayerSimulator> playerSim;
+    std::unique_ptr<UserInterface> ui;
+    std::unique_ptr<SimulatedUserInterface> simulatedUi;
+    std::unique_ptr<UdpSender> sender;
+    std::unique_ptr<UdpReceiver> receiver;
 
-    UserInterface ui(BUTTON_GPIO, LED_GPIO);
+    std::function<bool()> isActive;
+    std::function<void(bool)> setLed;
 
-    UdpSender sender(udpGroup, UDP_PORT);
-    UdpReceiver receiver(udpGroup, UDP_PORT);
+    // end-to-end WCET tracker
+    WCETStats endToEndStats;
 
-    TransceiverArgs transceiverArgs{
-        &micFifo,
-        &playbackFifo,
-        &ui,
-        &sender,
-        &receiver
-    };
+    if (simulationMode) {
+        if (!userSpecifiedUdp) {
+            udpGroup = "127.0.0.1"; // safe loopback for simulation
+        }
 
-    pthread_t recorderThread;
-    pthread_t playerThread;
-    pthread_t transmitThread;
-    pthread_t receiveThreadId;
+        simulatedUi = std::make_unique<SimulatedUserInterface>();
+        recorderSim = std::make_unique<AudioRecorderSimulator>(micFifo, useUdp ? &endToEndStats : nullptr);
+        playerSim = std::make_unique<AudioPlayerSimulator>(playbackFifo, useUdp ? &endToEndStats : nullptr);
 
-    pthread_create(&recorderThread, nullptr, recorder_thread, &recorder);
-    pthread_create(&playerThread, nullptr, player_thread, &player);
-    pthread_create(&transmitThread, nullptr, transmit_thread, &transceiverArgs);
-    pthread_create(&receiveThreadId, nullptr, receive_thread, &transceiverArgs);
+        isActive = [thisSimulation = simulatedUi.get()]() {
+            return thisSimulation->isButtonPressed();
+        };
+        setLed = [](bool) {};
+    } else {
+#ifndef USE_SIMULATION
+        Pa_Initialize();
+
+        recorder = std::make_unique<AudioRecorder>(micFifo, &endToEndStats);
+        player = std::make_unique<AudioPlayer>(playbackFifo, &endToEndStats);
+        ui = std::make_unique<UserInterface>(BUTTON_GPIO, LED_GPIO);
+        sender = std::make_unique<UdpSender>(udpGroup, UDP_PORT);
+        receiver = std::make_unique<UdpReceiver>(udpGroup, UDP_PORT);
+
+        isActive = [thisUi = ui.get()]() {
+            return thisUi->isButtonPressed();
+        };
+        setLed = [thisUi = ui.get()](bool on) {
+            thisUi->setLed(on);
+        };
+#else
+        std::cerr << "Hardware mode is disabled in this build. Run without -DUSE_SIMULATION=ON." << std::endl;
+        return 1;
+#endif
+    }
+
+    std::thread recorderThread([&] {
+        if (simulationMode) {
+            recorderSim->start();
+        } else {
+#ifndef USE_SIMULATION
+            recorder->start();
+#endif
+        }
+    });
+
+    std::thread playerThread([&] {
+        if (simulationMode) {
+            playerSim->start();
+        } else {
+#ifndef USE_SIMULATION
+            player->start();
+#endif
+        }
+    });
+
+    std::thread transmitThread([&] {
+        transmitLoop(micFifo, playbackFifo, isActive, setLed, useUdp ? sender.get() : nullptr, simulationMode);
+    });
+
+    std::thread receiveThread;
+    if (useUdp && receiver) {
+        receiveThread = std::thread([&] {
+            receiveLoop(playbackFifo, *receiver);
+        });
+    }
 
     std::cout << "Conferencing started..." << std::endl;
-    std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
 
-    pthread_join(recorderThread, nullptr);
-    pthread_join(playerThread, nullptr);
-    pthread_join(transmitThread, nullptr);
-    pthread_join(receiveThreadId, nullptr);
+    recorderThread.join();
+    playerThread.join();
+    transmitThread.join();
+    if (receiveThread.joinable()) {
+        receiveThread.join();
+    }
 
-    Pa_Terminate();
+    // Print end-to-end WCET summary
+    if (endToEndStats.count) {
+        std::cout << "[EndToEnd] blocks=" << endToEndStats.count
+                  << " avg_ns=" << (endToEndStats.totalNs / endToEndStats.count)
+                  << " max_ns=" << endToEndStats.maxNs
+                  << " min_ns=" << endToEndStats.minNs
+                  << std::endl;
+    }
+
+    if (!simulationMode) {
+#ifndef USE_SIMULATION
+        Pa_Terminate();
+#endif
+    }
 
     return 0;
 }

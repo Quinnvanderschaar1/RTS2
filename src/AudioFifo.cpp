@@ -10,21 +10,21 @@ AudioFifo::~AudioFifo() {
     pthread_cond_destroy(&cond);
 }
 
-void AudioFifo::push(const std::vector<float>& block) {
+void AudioFifo::push(const AudioBlock& block) {
     pthread_mutex_lock(&mutex);
     queue.push(block);
     pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mutex);
 }
 
-std::vector<float> AudioFifo::pop() {
+AudioBlock AudioFifo::pop() {
     pthread_mutex_lock(&mutex);
 
     while (queue.empty()) {
         pthread_cond_wait(&cond, &mutex);
     }
 
-    std::vector<float> block = queue.front();
+    AudioBlock block = queue.front();
     queue.pop();
 
     pthread_mutex_unlock(&mutex);
