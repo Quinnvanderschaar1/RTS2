@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     }
 
-    AudioFifo micFifo;
-    AudioFifo playbackFifo;
+    AudioFifo micFifo(8);
+    AudioFifo playbackFifo(8);
 
 #ifndef USE_SIMULATION
     std::unique_ptr<AudioRecorder> recorder;

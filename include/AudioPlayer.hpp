@@ -40,4 +40,15 @@ public:
      * audio blocks received from the FIFO.
      */
     void start();
+
+private:
+    static int playCallback(
+        const void* inputBuffer,
+        void* outputBuffer,
+        unsigned long framesPerBuffer,
+        const PaStreamCallbackTimeInfo* timeInfo,
+        PaStreamCallbackFlags statusFlags,
+        void* userData
+    );
+    int fillOutput(float* outputBuffer, unsigned long framesPerBuffer);
 };

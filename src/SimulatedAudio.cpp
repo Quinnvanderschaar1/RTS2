@@ -45,7 +45,12 @@ void AudioRecorderSimulator::start() {
         ++blockCount;
 
         nextWake += blockDuration;
-        std::this_thread::sleep_until(nextWake);
+        auto now = std::chrono::steady_clock::now();
+        if (nextWake <= now) {
+            nextWake = now + blockDuration;
+        } else {
+            std::this_thread::sleep_until(nextWake);
+        }
     }
 }
 
@@ -55,6 +60,7 @@ void AudioPlayerSimulator::start() {
     const auto blockDuration = std::chrono::microseconds(1000000LL * FRAMES_10MS / SAMPLE_RATE);
     AudioMixer mixer;
     AudioProcessing processor;
+    auto nextPlayback = std::chrono::steady_clock::now();
 
     while (true) {
         auto t0 = std::chrono::steady_clock::now();
@@ -63,14 +69,6 @@ void AudioPlayerSimulator::start() {
         uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
         popStats.update(popLatency);
         gTimingLogger.add("player_sim_pop", blockCount.load() + 1, popLatency);
-
-        // end-to-end measurement: now - capture timestamp
-        if (e2eStats && block.captureNs != 0) {
-            uint64_t nowNs = std::chrono::duration_cast<std::chrono::nanoseconds>(t1.time_since_epoch()).count();
-            uint64_t latency = nowNs - block.captureNs;
-            e2eStats->update(latency);
-            gTimingLogger.add("player_sim_end_to_end", blockCount.load() + 1, latency);
-        }
 
         auto tMix0 = std::chrono::steady_clock::now();
         std::vector<float> mixed = mixer.mix({block.samples});
@@ -84,11 +82,28 @@ void AudioPlayerSimulator::start() {
         gTimingLogger.add("player_sim_proc", blockCount.load() + 1,
             std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count());
 
-        auto t2 = std::chrono::steady_clock::now();
-        (void)output;
-        std::this_thread::sleep_for(blockDuration);
+        // keep playback timing independent, but do not hold an extra full cycle if behind
+        nextPlayback += blockDuration;
+        auto now = std::chrono::steady_clock::now();
+        if (nextPlayback > now) {
+            std::this_thread::sleep_until(nextPlayback);
+        } else {
+            nextPlayback = now;
+        }
+
+        // playback instant
+        auto playbackTime = std::chrono::steady_clock::now();
+
+         // end-to-end measurement: now - capture timestamp
+        if (e2eStats && block.captureNs != 0) {
+            uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(playbackTime.time_since_epoch()).count();
+            uint64_t latency = playbackNs - block.captureNs;
+            e2eStats->update(latency);
+            gTimingLogger.add("player_sim_end_to_end", blockCount.load() + 1, latency);
+        }
+
         auto t3 = std::chrono::steady_clock::now();
-        uint64_t consumeLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count();
+        uint64_t consumeLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count();
         consumeStats.update(consumeLatency);
         gTimingLogger.add("player_sim_consume", blockCount.load() + 1, consumeLatency);
 

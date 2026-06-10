@@ -40,4 +40,15 @@ public:
      * audio blocks into the FIFO.
      */
     void start();
+
+private:
+    static int recordCallback(
+        const void* inputBuffer,
+        void* outputBuffer,
+        unsigned long framesPerBuffer,
+        const PaStreamCallbackTimeInfo* timeInfo,
+        PaStreamCallbackFlags statusFlags,
+        void* userData
+    );
+    int processInput(const float* inputBuffer, unsigned long framesPerBuffer);
 };

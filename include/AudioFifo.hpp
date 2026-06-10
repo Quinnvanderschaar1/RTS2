@@ -37,6 +37,11 @@ private:
      */
     pthread_cond_t cond;
 
+    /**
+     * @brief Maximum number of blocks allowed in the FIFO.
+     */
+    size_t capacity;
+
     // occupancy tracking
     size_t maxSize{0};
     uint64_t cumulativeSize{0};
@@ -45,8 +50,9 @@ private:
 public:
     /**
      * @brief Constructs an empty audio FIFO.
+     * @param capacity Maximum number of blocks to buffer.
      */
-    AudioFifo();
+    AudioFifo(size_t capacity = 8);
 
     /**
      * @brief Destroys the audio FIFO and releases synchronization resources.
@@ -68,4 +74,18 @@ public:
      * @return The oldest audio block in the queue.
      */
     AudioBlock pop();
+
+    /**
+     * @brief Tries to push a block into the FIFO without blocking.
+     *
+     * Returns false if the FIFO is full or if the lock is unavailable.
+     */
+    bool tryPush(AudioBlock block, bool log = true);
+
+    /**
+     * @brief Tries to pop a block from the FIFO without blocking.
+     *
+     * Returns false if no block is available or if the lock is unavailable.
+     */
+    bool tryPop(AudioBlock& block, bool log = true);
 };
