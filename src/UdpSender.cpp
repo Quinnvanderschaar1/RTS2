@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <endian.h>
+#include <chrono>
 
 UdpSender::UdpSender(const std::string& address, uint16_t port)
     : address(address), port(port)
@@ -64,12 +65,17 @@ void UdpSender::sendBlock(const AudioBlock& block) {
     addr.sin_port = htons(port);
     inet_pton(AF_INET, address.c_str(), &addr.sin_addr);
 
-    // Payload: first 8 bytes = captureNs (uint64_t, network byte order), followed by float samples
-    uint64_t netTs = htobe64(block.captureNs);
-    size_t payloadSize = sizeof(netTs) + block.samples.size() * sizeof(float);
+    // Payload: first 8 bytes = captureNs, next 8 bytes = sendNs, both network byte order, followed by float samples
+    uint64_t netCapture = htobe64(block.captureNs);
+    uint64_t sendNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+    uint64_t netSend = htobe64(sendNs);
+
+    size_t payloadSize = sizeof(netCapture) + sizeof(netSend) + block.samples.size() * sizeof(float);
     std::vector<char> payload(payloadSize);
-    memcpy(payload.data(), &netTs, sizeof(netTs));
-    memcpy(payload.data() + sizeof(netTs), block.samples.data(), block.samples.size() * sizeof(float));
+    memcpy(payload.data(), &netCapture, sizeof(netCapture));
+    memcpy(payload.data() + sizeof(netCapture), &netSend, sizeof(netSend));
+    memcpy(payload.data() + sizeof(netCapture) + sizeof(netSend), block.samples.data(), block.samples.size() * sizeof(float));
 
     sendto(
         socketFd,

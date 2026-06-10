@@ -1,4 +1,7 @@
 #include "SimulatedAudio.hpp"
+#include "TimingLogger.hpp"
+#include "AudioMixer.hpp"
+#include "AudioProcessing.hpp"
 #include <chrono>
 #include <cmath>
 #include <thread>
@@ -25,7 +28,9 @@ void AudioRecorderSimulator::start() {
             if (phase >= SAMPLE_RATE) phase -= SAMPLE_RATE;
         }
         auto t1 = std::chrono::steady_clock::now();
-        genStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count());
+        uint64_t genLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+        genStats.update(genLatency);
+        gTimingLogger.add("recorder_sim_gen", blockCount.load() + 1, genLatency);
 
         auto tPush0 = std::chrono::steady_clock::now();
         AudioBlock out;
@@ -33,18 +38,11 @@ void AudioRecorderSimulator::start() {
         out.samples = buffer;
         fifo.push(out);
         auto tPush1 = std::chrono::steady_clock::now();
-        pushStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count());
+        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+        pushStats.update(pushLatency);
+        gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
 
         ++blockCount;
-        if ((blockCount.load() & 0xFF) == 0) {
-            // periodic report
-            std::cout << "[RecorderSim] blocks=" << blockCount.load()
-                      << " gen_ns(avg)=" << (genStats.count ? genStats.totalNs / genStats.count : 0)
-                      << " gen_max=" << genStats.maxNs
-                      << " push_ns(avg)=" << (pushStats.count ? pushStats.totalNs / pushStats.count : 0)
-                      << " push_max=" << pushStats.maxNs
-                      << std::endl;
-        }
 
         nextWake += blockDuration;
         std::this_thread::sleep_until(nextWake);
@@ -55,33 +53,45 @@ AudioPlayerSimulator::AudioPlayerSimulator(AudioFifo& f, WCETStats* e2e) : fifo(
 
 void AudioPlayerSimulator::start() {
     const auto blockDuration = std::chrono::microseconds(1000000LL * FRAMES_10MS / SAMPLE_RATE);
+    AudioMixer mixer;
+    AudioProcessing processor;
 
     while (true) {
         auto t0 = std::chrono::steady_clock::now();
         AudioBlock block = fifo.pop();
         auto t1 = std::chrono::steady_clock::now();
-        popStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count());
+        uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+        popStats.update(popLatency);
+        gTimingLogger.add("player_sim_pop", blockCount.load() + 1, popLatency);
 
         // end-to-end measurement: now - capture timestamp
         if (e2eStats && block.captureNs != 0) {
             uint64_t nowNs = std::chrono::duration_cast<std::chrono::nanoseconds>(t1.time_since_epoch()).count();
-            e2eStats->update(nowNs - block.captureNs);
+            uint64_t latency = nowNs - block.captureNs;
+            e2eStats->update(latency);
+            gTimingLogger.add("player_sim_end_to_end", blockCount.load() + 1, latency);
         }
+
+        auto tMix0 = std::chrono::steady_clock::now();
+        std::vector<float> mixed = mixer.mix({block.samples});
+        auto tMix1 = std::chrono::steady_clock::now();
+        gTimingLogger.add("player_sim_mix", blockCount.load() + 1,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(tMix1 - tMix0).count());
+
+        auto tProc0 = std::chrono::steady_clock::now();
+        std::vector<float> output = processor.lowPass(mixed, 0.5f);
+        auto tProc1 = std::chrono::steady_clock::now();
+        gTimingLogger.add("player_sim_proc", blockCount.load() + 1,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count());
 
         auto t2 = std::chrono::steady_clock::now();
-        (void)block;
+        (void)output;
         std::this_thread::sleep_for(blockDuration);
         auto t3 = std::chrono::steady_clock::now();
-        consumeStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count());
+        uint64_t consumeLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count();
+        consumeStats.update(consumeLatency);
+        gTimingLogger.add("player_sim_consume", blockCount.load() + 1, consumeLatency);
 
         ++blockCount;
-        if ((blockCount.load() & 0xFF) == 0) {
-            std::cout << "[PlayerSim] blocks=" << blockCount.load()
-                      << " pop_ns(avg)=" << (popStats.count ? popStats.totalNs / popStats.count : 0)
-                      << " pop_max=" << popStats.maxNs
-                      << " cons_ns(avg)=" << (consumeStats.count ? consumeStats.totalNs / consumeStats.count : 0)
-                      << " cons_max=" << consumeStats.maxNs
-                      << std::endl;
-        }
     }
 }

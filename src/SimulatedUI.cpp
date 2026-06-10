@@ -1,4 +1,6 @@
 #include "SimulatedUI.hpp"
+#include "TimingLogger.hpp"
+#include <cstdlib>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -21,6 +23,15 @@ static bool isKeyboardPressedOnce() {
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     fcntl(STDIN_FILENO, F_SETFL, oldFlags);
+
+    if (ch == 'x' || ch == 'X') {
+           std::cout << "Saving CSV files and exiting..." << std::endl;
+           gTimingLogger.saveCSV("timing_report.csv");
+           gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
+           gTimingLogger.saveQueueCSV("queue_latency.csv");
+           gTimingLogger.saveNetworkCSV("network_jitter.csv");
+           std::exit(0);
+    }
 
     return ch == ' ';
 }

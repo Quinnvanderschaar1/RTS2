@@ -26,6 +26,7 @@ set(SRC_FILES
     src/UdpReceiver.cpp
     src/SimulatedAudio.cpp
     src/SimulatedUI.cpp
+    src/TimingLogger.cpp
     src/Transceiver.cpp
 )
 

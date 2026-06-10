@@ -15,6 +15,8 @@
  */
 struct AudioBlock {
     uint64_t captureNs{0};
+    uint64_t pushNs{0};
+    uint64_t sendNs{0};
     std::vector<float> samples;
 };
 
@@ -35,6 +37,11 @@ private:
      */
     pthread_cond_t cond;
 
+    // occupancy tracking
+    size_t maxSize{0};
+    uint64_t cumulativeSize{0};
+    uint64_t occupancyCount{0};
+
 public:
     /**
      * @brief Constructs an empty audio FIFO.
@@ -51,7 +58,7 @@ public:
      *
      * @param block Audio block to add to the queue.
      */
-    void push(const AudioBlock& block);
+    void push(AudioBlock block);
 
     /**
      * @brief Removes and returns the oldest audio block from the FIFO.

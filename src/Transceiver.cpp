@@ -1,4 +1,5 @@
 #include "Transceiver.hpp"
+#include "TimingLogger.hpp"
 #include <chrono>
 #include <iostream>
 
@@ -16,7 +17,9 @@ void transmitLoop(
         auto t0 = std::chrono::steady_clock::now();
         AudioBlock micBlock = micFifo.pop();
         auto t1 = std::chrono::steady_clock::now();
-        stats.pop.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count());
+        uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+        stats.pop.update(popLatency);
+        gTimingLogger.add("transmit_pop", stats.count + 1, popLatency);
 
         auto t2 = std::chrono::steady_clock::now();
         bool active = isActive();
@@ -24,24 +27,25 @@ void transmitLoop(
 
         if (active) {
             if (sender != nullptr) {
-                // send via UDP (includes timestamp)
+                auto tSend0 = std::chrono::steady_clock::now();
                 sender->sendBlock(micBlock);
+                auto tSend1 = std::chrono::steady_clock::now();
+                uint64_t sendLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tSend1 - tSend0).count();
+                gTimingLogger.add("transmit_send", stats.count + 1, sendLatency);
             } else {
-                // local loop: push directly to playback
+                auto tPush0 = std::chrono::steady_clock::now();
                 playbackFifo.push(micBlock);
+                auto tPush1 = std::chrono::steady_clock::now();
+                uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+                gTimingLogger.add("transmit_local_push", stats.count + 1, pushLatency);
             }
         }
         auto t3 = std::chrono::steady_clock::now();
-        stats.proc.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count());
+        uint64_t procLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count();
+        stats.proc.update(procLatency);
+        gTimingLogger.add("transmit_proc", stats.count + 1, procLatency);
 
-        if ((++stats.count & 0xFF) == 0) {
-            std::cout << "[Transmit] blocks=" << stats.count
-                      << " pop_ns(avg)=" << (stats.pop.count ? stats.pop.totalNs / stats.pop.count : 0)
-                      << " pop_max=" << stats.pop.maxNs
-                      << " proc_ns(avg)=" << (stats.proc.count ? stats.proc.totalNs / stats.proc.count : 0)
-                      << " proc_max=" << stats.proc.maxNs
-                      << std::endl;
-        }
+        ++stats.count;
     }
 }
 
@@ -54,22 +58,20 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
         auto t0 = std::chrono::steady_clock::now();
         AudioBlock remoteBlock = receiver.receiveBlock(480);
         auto t1 = std::chrono::steady_clock::now();
-        recvStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count());
+        uint64_t recvLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 
         if (!remoteBlock.samples.empty()) {
+            recvStats.update(recvLatency);
+            gTimingLogger.add("receive_recv", receivedCount + 1, recvLatency);
+
             auto t2 = std::chrono::steady_clock::now();
             playbackFifo.push(remoteBlock);
             auto t3 = std::chrono::steady_clock::now();
-            pushStats.update(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count());
+            uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count();
+            pushStats.update(pushLatency);
+            gTimingLogger.add("receive_push", receivedCount + 1, pushLatency);
 
-            if ((++receivedCount & 0xFF) == 0) {
-                std::cout << "[Receive] packets=" << receivedCount
-                          << " recv_ns(avg)=" << (recvStats.count ? recvStats.totalNs / recvStats.count : 0)
-                          << " recv_max=" << recvStats.maxNs
-                          << " push_ns(avg)=" << (pushStats.count ? pushStats.totalNs / pushStats.count : 0)
-                          << " push_max=" << pushStats.maxNs
-                          << std::endl;
-            }
+            ++receivedCount;
         }
     }
 }

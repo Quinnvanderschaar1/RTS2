@@ -12,6 +12,7 @@
 #include "SimulatedUI.hpp"
 #include "Transceiver.hpp"
 #include "wcet.hpp"
+#include "TimingLogger.hpp"
 
 #include <chrono>
 #include <cstring>
@@ -20,6 +21,7 @@
 #include <thread>
 #include <vector>
 #include <cstdint>
+#include <cstdlib>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -61,12 +63,20 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    std::atexit([]() {
+        gTimingLogger.saveCSV("timing_report.csv");
+        gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
+        gTimingLogger.saveQueueCSV("queue_latency.csv");
+        gTimingLogger.saveNetworkCSV("network_jitter.csv");
+    });
+
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
     if (!simulationMode) {
         std::cout << "Using UDP address: " << udpGroup << std::endl;
     } else {
         std::cout << "Simulation active: microphone and playback are both simulated." << std::endl;
         std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
+        std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     }
 
     AudioFifo micFifo;
@@ -97,6 +107,10 @@ int main(int argc, char* argv[]) {
         simulatedUi = std::make_unique<SimulatedUserInterface>();
         recorderSim = std::make_unique<AudioRecorderSimulator>(micFifo, useUdp ? &endToEndStats : nullptr);
         playerSim = std::make_unique<AudioPlayerSimulator>(playbackFifo, useUdp ? &endToEndStats : nullptr);
+        if (useUdp) {
+            sender = std::make_unique<UdpSender>(udpGroup, UDP_PORT);
+            receiver = std::make_unique<UdpReceiver>(udpGroup, UDP_PORT);
+        }
 
         isActive = [thisSimulation = simulatedUi.get()]() {
             return thisSimulation->isButtonPressed();
@@ -164,14 +178,6 @@ int main(int argc, char* argv[]) {
         receiveThread.join();
     }
 
-    // Print end-to-end WCET summary
-    if (endToEndStats.count) {
-        std::cout << "[EndToEnd] blocks=" << endToEndStats.count
-                  << " avg_ns=" << (endToEndStats.totalNs / endToEndStats.count)
-                  << " max_ns=" << endToEndStats.maxNs
-                  << " min_ns=" << endToEndStats.minNs
-                  << std::endl;
-    }
 
     if (!simulationMode) {
 #ifndef USE_SIMULATION
