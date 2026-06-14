@@ -180,7 +180,7 @@ make
 Run:
 
 ```bash
-./RTS2
+./conferencing
 ```
 
 ---
@@ -203,13 +203,13 @@ make
 Run:
 
 ```bash
-./RTS2 --hw
+./conferencing --hw
 ```
 
 Or specify a UDP address:
 
 ```bash
-./RTS2 192.168.50.189
+./conferencing 192.168.50.189
 ```
 
 ---
