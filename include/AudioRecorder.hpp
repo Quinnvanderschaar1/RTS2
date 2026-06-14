@@ -23,6 +23,16 @@ private:
      */
     PaStream* stream = nullptr;
 
+    /**
+     * @brief Optional end-to-end statistics collector.
+     */
+    WCETStats* e2eStats = nullptr;
+
+    /**
+     * @brief Count of audio blocks processed.
+     */
+    uint64_t blockCount = 0;
+
 public:
     /**
      * @brief Constructs an AudioRecorder.

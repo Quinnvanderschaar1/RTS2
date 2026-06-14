@@ -181,7 +181,7 @@ int main(int argc, char* argv[]) {
 
     if (!simulationMode) {
 #ifndef USE_SIMULATION
-        Pa_Terminate();
+        Pa_Termiinate();
 #endif
     }
 
