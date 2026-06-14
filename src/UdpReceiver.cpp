@@ -126,7 +126,7 @@ AudioBlock UdpReceiver::receiveBlock(size_t maxFloats) {
 
     // log network jitter (recv time now - sendTs)
     uint64_t recvNow = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
+        std::chrono::system_clock::now().time_since_epoch()).count();
     NetworkJitterSample nj{sendTs, recvNow, (int64_t)(recvNow - sendTs)};
     gTimingLogger.addNetworkJitter(nj);
 

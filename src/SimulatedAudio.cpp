@@ -32,13 +32,14 @@ void AudioRecorderSimulator::start() {
         genStats.update(genLatency);
         gTimingLogger.add("recorder_sim_gen", blockCount.load() + 1, genLatency);
 
-        auto tPush0 = std::chrono::steady_clock::now();
+        auto sysPush0 = std::chrono::system_clock::now();
+        auto steadyPush0 = std::chrono::steady_clock::now();
         AudioBlock out;
-        out.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush0.time_since_epoch()).count();
+        out.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(sysPush0.time_since_epoch()).count();
         out.samples = buffer;
         fifo.push(out);
         auto tPush1 = std::chrono::steady_clock::now();
-        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - steadyPush0).count();
         pushStats.update(pushLatency);
         gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
 
@@ -92,7 +93,7 @@ void AudioPlayerSimulator::start() {
         }
 
         // playback instant
-        auto playbackTime = std::chrono::steady_clock::now();
+        auto playbackTime = std::chrono::system_clock::now();
 
          // end-to-end measurement: now - capture timestamp
         if (e2eStats && block.captureNs != 0) {

@@ -35,13 +35,14 @@ AudioRecorder::AudioRecorder(AudioFifo& fifo) : fifo(fifo) {}
 AudioRecorder::AudioRecorder(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
 
 int AudioRecorder::processInput(const float* inputBuffer, unsigned long framesPerBuffer) {
-    auto t0 = std::chrono::steady_clock::now();
+    auto sysNow = std::chrono::system_clock::now();
+    auto steadyNow = std::chrono::steady_clock::now();
     AudioBlock block;
     block.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        t0.time_since_epoch()).count();
+        sysNow.time_since_epoch()).count();
     block.samples.assign(inputBuffer, inputBuffer + framesPerBuffer);
     auto t1 = std::chrono::steady_clock::now();
-    uint64_t captureLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    uint64_t captureLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - steadyNow).count();
     gTimingLogger.add("recorder_hw_capture", blockCount + 1, captureLatency);
 
     auto tPush0 = std::chrono::steady_clock::now();

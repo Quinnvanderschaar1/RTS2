@@ -50,12 +50,18 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
     uint64_t outputLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tCopy1 - tCopy0).count();
     gTimingLogger.add("player_hw_output", blockCount + 1, outputLatency);
 
-    if (e2eStats && block.captureNs != 0) {
+    if (e2eStats) {
         uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
-        uint64_t latency = playbackNs - block.captureNs;
-        e2eStats->update(latency);
-        gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        if (block.sendNs != 0) {
+            uint64_t latency = playbackNs - block.sendNs;
+            e2eStats->update(latency);
+            gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
+        } else if (block.captureNs != 0) {
+            uint64_t latency = playbackNs - block.captureNs;
+            e2eStats->update(latency);
+            gTimingLogger.add("player_local_end_to_end", blockCount + 1, latency);
+        }
     }
 
     ++blockCount;

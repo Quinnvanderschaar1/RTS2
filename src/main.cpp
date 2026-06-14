@@ -8,6 +8,7 @@
 #include "UdpReceiver.hpp"
 #include "AudioMixer.hpp"
 #include "AudioProcessing.hpp"
+#include "ProcessingThreads.hpp"
 #include "SimulatedAudio.hpp"
 #include "SimulatedUI.hpp"
 #include "Transceiver.hpp"
@@ -191,32 +192,22 @@ int main(int argc, char* argv[]) {
     std::thread transmitThread;
 
     if (useProcessing) {
-        lowPassThread = std::thread([&] {
-            while (true) {
-                AudioBlock block = micFifo.pop();
+        lowPassThread = std::thread(
+            lowPassThreadLoop,
+            std::ref(micFifo),
+            std::ref(lowPassFifo),
+            std::ref(audioProcessing),
+            LOW_PASS_ALPHA
+        );
 
-                block.samples = audioProcessing.lowPass(
-                    block.samples,
-                    LOW_PASS_ALPHA
-                );
-
-                lowPassFifo.push(block);
-            }
-        });
-
-        echoCancelThread = std::thread([&] {
-            while (true) {
-                AudioBlock block = lowPassFifo.pop();
-
-                block.samples = audioProcessing.echoCancellation(
-                    block.samples,
-                    ECHO_DELAY_SAMPLES,
-                    ECHO_DECAY
-                );
-
-                echoCancelFifo.push(block);
-            }
-        });
+        echoCancelThread = std::thread(
+            echoCancelThreadLoop,
+            std::ref(lowPassFifo),
+            std::ref(echoCancelFifo),
+            std::ref(audioProcessing),
+            ECHO_DELAY_SAMPLES,
+            ECHO_DECAY
+        );
 
         transmitThread = std::thread([&] {
             transmitLoop(

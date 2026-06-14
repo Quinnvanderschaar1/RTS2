@@ -68,7 +68,7 @@ void UdpSender::sendBlock(const AudioBlock& block) {
     // Payload: first 8 bytes = captureNs, next 8 bytes = sendNs, both network byte order, followed by float samples
     uint64_t netCapture = htobe64(block.captureNs);
     uint64_t sendNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::steady_clock::now().time_since_epoch()).count();
+        std::chrono::system_clock::now().time_since_epoch()).count();
     uint64_t netSend = htobe64(sendNs);
 
     size_t payloadSize = sizeof(netCapture) + sizeof(netSend) + block.samples.size() * sizeof(float);
