@@ -39,7 +39,7 @@ static bool isKeyboardPressedOnce() {
 bool SimulatedUserInterface::isButtonPressed() {
     if (isKeyboardPressedOnce()) {
         keyboardEnabled = !keyboardEnabled;
-        printf("Keyboard toggle: %s\n", keyboardEnabled ? "ON" : "OFF");
+        printf("Keyboard toggle d: %s\n", keyboardEnabled ? "ON" : "OFF");
         fflush(stdout);
     }
     return keyboardEnabled;

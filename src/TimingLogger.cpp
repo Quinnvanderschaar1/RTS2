@@ -23,6 +23,7 @@ void TimingLogger::addNetworkJitter(const NetworkJitterSample& s) {
 }
 
 void TimingLogger::saveCSV(const std::string& filename) {
+    printf("Saving timing report to %s...\n", filename.c_str());
     std::lock_guard<std::mutex> lock(mutex);
     std::ofstream file(filename);
 
