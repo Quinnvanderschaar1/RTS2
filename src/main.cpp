@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
+
 #ifndef USE_SIMULATION
 #include <portaudio.h>
 #endif
@@ -37,14 +38,20 @@ constexpr uint16_t UDP_PORT = 5005;
 constexpr int BUTTON_GPIO = 17;
 constexpr int LED_GPIO = 27;
 
+constexpr float LOW_PASS_ALPHA = 0.15f;
+constexpr int ECHO_DELAY_SAMPLES = FRAMES_10MS;
+constexpr float ECHO_DECAY = 0.35f;
+
 int main(int argc, char* argv[]) {
     bool simulationMode = true;
     std::string udpGroup = UDP_GROUP;
-    bool useUdp = true; // default: include UDP in simulation
+    bool useUdp = true;
     bool userSpecifiedUdp = false;
+    bool useProcessing = true;
 
     auto hasPrefix = [](const std::string& value, const std::string& prefix) {
-        return value.size() >= prefix.size() && value.compare(0, prefix.size(), prefix) == 0;
+        return value.size() >= prefix.size() &&
+               value.compare(0, prefix.size(), prefix) == 0;
     };
 
     for (int i = 1; i < argc; ++i) {
@@ -56,6 +63,8 @@ int main(int argc, char* argv[]) {
             simulationMode = true;
         } else if (arg == "--no-udp") {
             useUdp = false;
+        } else if (arg == "--np") {
+            useProcessing = false;
         } else if (!hasPrefix(arg, "--")) {
             udpGroup = arg;
             userSpecifiedUdp = true;
@@ -71,6 +80,10 @@ int main(int argc, char* argv[]) {
     });
 
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
+    std::cout << "Audio processing: "
+              << (useProcessing ? "enabled" : "disabled")
+              << std::endl;
+
     if (!simulationMode) {
         std::cout << "Using UDP address: " << udpGroup << std::endl;
     } else {
@@ -80,12 +93,17 @@ int main(int argc, char* argv[]) {
     }
 
     AudioFifo micFifo(8);
+    AudioFifo lowPassFifo(8);
+    AudioFifo echoCancelFifo(8);
     AudioFifo playbackFifo(8);
+
+    AudioProcessing audioProcessing;
 
 #ifndef USE_SIMULATION
     std::unique_ptr<AudioRecorder> recorder;
     std::unique_ptr<AudioPlayer> player;
 #endif
+
     std::unique_ptr<AudioRecorderSimulator> recorderSim;
     std::unique_ptr<AudioPlayerSimulator> playerSim;
     std::unique_ptr<UserInterface> ui;
@@ -96,17 +114,25 @@ int main(int argc, char* argv[]) {
     std::function<bool()> isActive;
     std::function<void(bool)> setLed;
 
-    // end-to-end WCET tracker
     WCETStats endToEndStats;
 
     if (simulationMode) {
         if (!userSpecifiedUdp) {
-            udpGroup = "127.0.0.1"; // safe loopback for simulation
+            udpGroup = "127.0.0.1";
         }
 
         simulatedUi = std::make_unique<SimulatedUserInterface>();
-        recorderSim = std::make_unique<AudioRecorderSimulator>(micFifo, useUdp ? &endToEndStats : nullptr);
-        playerSim = std::make_unique<AudioPlayerSimulator>(playbackFifo, useUdp ? &endToEndStats : nullptr);
+
+        recorderSim = std::make_unique<AudioRecorderSimulator>(
+            micFifo,
+            useUdp ? &endToEndStats : nullptr
+        );
+
+        playerSim = std::make_unique<AudioPlayerSimulator>(
+            playbackFifo,
+            useUdp ? &endToEndStats : nullptr
+        );
+
         if (useUdp) {
             sender = std::make_unique<UdpSender>(udpGroup, UDP_PORT);
             receiver = std::make_unique<UdpReceiver>(udpGroup, UDP_PORT);
@@ -115,6 +141,7 @@ int main(int argc, char* argv[]) {
         isActive = [thisSimulation = simulatedUi.get()]() {
             return thisSimulation->isButtonPressed();
         };
+
         setLed = [](bool) {};
     } else {
 #ifndef USE_SIMULATION
@@ -129,6 +156,7 @@ int main(int argc, char* argv[]) {
         isActive = [thisUi = ui.get()]() {
             return thisUi->isButtonPressed();
         };
+
         setLed = [thisUi = ui.get()](bool on) {
             thisUi->setLed(on);
         };
@@ -158,11 +186,63 @@ int main(int argc, char* argv[]) {
         }
     });
 
-    std::thread transmitThread([&] {
-        transmitLoop(micFifo, playbackFifo, isActive, setLed, useUdp ? sender.get() : nullptr, simulationMode);
-    });
+    std::thread lowPassThread;
+    std::thread echoCancelThread;
+    std::thread transmitThread;
+
+    if (useProcessing) {
+        lowPassThread = std::thread([&] {
+            while (true) {
+                AudioBlock block = micFifo.pop();
+
+                block.samples = audioProcessing.lowPass(
+                    block.samples,
+                    LOW_PASS_ALPHA
+                );
+
+                lowPassFifo.push(block);
+            }
+        });
+
+        echoCancelThread = std::thread([&] {
+            while (true) {
+                AudioBlock block = lowPassFifo.pop();
+
+                block.samples = audioProcessing.echoCancellation(
+                    block.samples,
+                    ECHO_DELAY_SAMPLES,
+                    ECHO_DECAY
+                );
+
+                echoCancelFifo.push(block);
+            }
+        });
+
+        transmitThread = std::thread([&] {
+            transmitLoop(
+                echoCancelFifo,
+                playbackFifo,
+                isActive,
+                setLed,
+                useUdp ? sender.get() : nullptr,
+                simulationMode
+            );
+        });
+    } else {
+        transmitThread = std::thread([&] {
+            transmitLoop(
+                micFifo,
+                playbackFifo,
+                isActive,
+                setLed,
+                useUdp ? sender.get() : nullptr,
+                simulationMode
+            );
+        });
+    }
 
     std::thread receiveThread;
+
     if (useUdp && receiver) {
         receiveThread = std::thread([&] {
             receiveLoop(playbackFifo, *receiver);
@@ -173,11 +253,20 @@ int main(int argc, char* argv[]) {
 
     recorderThread.join();
     playerThread.join();
+
+    if (lowPassThread.joinable()) {
+        lowPassThread.join();
+    }
+
+    if (echoCancelThread.joinable()) {
+        echoCancelThread.join();
+    }
+
     transmitThread.join();
+
     if (receiveThread.joinable()) {
         receiveThread.join();
     }
-
 
     if (!simulationMode) {
 #ifndef USE_SIMULATION
