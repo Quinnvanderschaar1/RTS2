@@ -17,10 +17,17 @@ sudo apt install libstdc++6
 
 ## build
 ```
+sudo apt install mingw-w64
+sudo apt install g++-aarch64-linux-gnu
+```
+
+
+```
 mkdir build
 cd build
 cmake ..
 make
+cpack
 ```
 
 ## Running

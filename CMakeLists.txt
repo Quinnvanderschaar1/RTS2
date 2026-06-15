@@ -58,3 +58,39 @@ else()
     target_include_directories(conferencing PRIVATE include)
     target_link_libraries(conferencing PRIVATE Threads::Threads)
 endif()
+
+
+
+# Install executable
+install(TARGETS conferencing
+    RUNTIME DESTINATION bin
+)
+
+# Package metadata
+set(CPACK_PACKAGE_NAME "conferencing")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_CONTACT "quinnvanderschaar@live.nl")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ conferencing application")
+
+# Package formats
+set(CPACK_GENERATOR "DEB;TGZ;ZIP")
+
+# Debian metadata
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Quinn")
+
+if(PORTAUDIO_FOUND)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libportaudio2, libstdc++6")
+else()
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6")
+endif()
+
+# Architecture detection
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
+endif()
+
+include(CPack)
