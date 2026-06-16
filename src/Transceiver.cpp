@@ -3,6 +3,8 @@
 #include <chrono>
 #include <iostream>
 
+#include "Globals.hpp"
+
 void transmitLoop(
     AudioFifo& micFifo,
     AudioFifo& playbackFifo,
@@ -56,7 +58,7 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
 
     while (true) {
         auto t0 = std::chrono::steady_clock::now();
-        AudioBlock remoteBlock = receiver.receiveBlock(480);
+        AudioBlock remoteBlock = receiver.receiveBlock(gFramesPerBuffer);
         auto t1 = std::chrono::steady_clock::now();
         uint64_t recvLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 

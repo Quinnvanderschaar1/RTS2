@@ -27,6 +27,8 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "Globals.hpp"
+
 #ifndef USE_SIMULATION
 #include <portaudio.h>
 #endif
@@ -97,6 +99,10 @@ int main(int argc, char* argv[]) {
         gTimingLogger.saveNetworkCSV("network_jitter.csv");
     });
 
+    gFrameDivisor = frameDivisor;
+    gFramesPerBuffer = SAMPLE_RATE / frameDivisor;
+    echoDelaySamples = gFramesPerBuffer;
+    
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
     std::cout << "Audio processing: "
               << (useProcessing ? "enabled" : "disabled")
