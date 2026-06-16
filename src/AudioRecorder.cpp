@@ -88,7 +88,7 @@ int AudioRecorder::recordCallback(
 void AudioRecorder::start() {
     enableRealtimeThread(0, 30);
 
-    Pa_OpenDefaultStream(
+    PaError err = Pa_OpenDefaultStream(
         &stream,
         CHANNELS,
         0,
@@ -99,7 +99,20 @@ void AudioRecorder::start() {
         this
     );
 
-    Pa_StartStream(stream);
+    if (err != paNoError) {
+        std::cerr << "Recorder Pa_OpenDefaultStream failed: "
+                  << Pa_GetErrorText(err) << std::endl;
+        return;
+    }
+
+    err = Pa_StartStream(stream);
+
+    if (err != paNoError) {
+        std::cerr << "Recorder Pa_StartStream failed: "
+                  << Pa_GetErrorText(err) << std::endl;
+        Pa_CloseStream(stream);
+        return;
+    }
 
     while (true) {
         Pa_Sleep(1000);

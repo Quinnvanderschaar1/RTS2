@@ -14,6 +14,7 @@
 #include "Transceiver.hpp"
 #include "wcet.hpp"
 #include "TimingLogger.hpp"
+#include "Globals.hpp"
 
 #include <chrono>
 #include <cstring>
@@ -26,8 +27,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
-
-#include "Globals.hpp"
+#include <atomic>
 
 #ifndef USE_SIMULATION
 #include <portaudio.h>
@@ -46,7 +46,7 @@ constexpr int DEFAULT_ECHO_DELAY_SAMPLES = FRAMES_10MS;
 constexpr float ECHO_DECAY = 0.35f;
 
 int main(int argc, char* argv[]) {
-    bool simulationMode = true;
+    bool simulationMode = false; // hardware mode is now default
     std::string udpGroup = UDP_GROUP;
     bool useUdp = true;
     bool userSpecifiedUdp = false;
@@ -102,16 +102,19 @@ int main(int argc, char* argv[]) {
     gFrameDivisor = frameDivisor;
     gFramesPerBuffer = SAMPLE_RATE / frameDivisor;
     echoDelaySamples = gFramesPerBuffer;
-    
+
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
     std::cout << "Audio processing: "
               << (useProcessing ? "enabled" : "disabled")
               << std::endl;
     std::cout << "Frame divisor: " << frameDivisor << std::endl;
+    std::cout << "Frames per buffer: " << gFramesPerBuffer << std::endl;
     std::cout << "Echo delay samples: " << echoDelaySamples << std::endl;
 
     if (!simulationMode) {
         std::cout << "Using UDP address: " << udpGroup << std::endl;
+        std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
+        std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     } else {
         std::cout << "Simulation active: microphone and playback are both simulated." << std::endl;
         std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
@@ -142,6 +145,9 @@ int main(int argc, char* argv[]) {
 
     WCETStats endToEndStats;
 
+    std::atomic<bool> transmitActive{false};
+    std::thread uiThread;
+
     if (simulationMode) {
         if (!userSpecifiedUdp) {
             udpGroup = "127.0.0.1";
@@ -171,7 +177,13 @@ int main(int argc, char* argv[]) {
         setLed = [](bool) {};
     } else {
 #ifndef USE_SIMULATION
-        Pa_Initialize();
+        PaError paErr = Pa_Initialize();
+
+        if (paErr != paNoError) {
+            std::cerr << "Pa_Initialize failed: "
+                      << Pa_GetErrorText(paErr) << std::endl;
+            return 1;
+        }
 
         recorder = std::make_unique<AudioRecorder>(micFifo, &endToEndStats);
         player = std::make_unique<AudioPlayer>(playbackFifo, &endToEndStats);
@@ -179,12 +191,21 @@ int main(int argc, char* argv[]) {
         sender = std::make_unique<UdpSender>(udpGroup, UDP_PORT);
         receiver = std::make_unique<UdpReceiver>(udpGroup, UDP_PORT);
 
-        isActive = [thisUi = ui.get()]() {
-            return thisUi->isButtonPressed();
+        uiThread = std::thread([&] {
+            while (true) {
+                bool active = ui->isButtonPressed();
+                transmitActive.store(active);
+                ui->setLed(active);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+        });
+
+        isActive = [&]() {
+            return transmitActive.load();
         };
 
-        setLed = [thisUi = ui.get()](bool on) {
-            thisUi->setLed(on);
+        setLed = [](bool) {
+            // LED is handled by uiThread
         };
 #else
         std::cerr << "Hardware mode is disabled in this build. Run without -DUSE_SIMULATION=ON." << std::endl;
@@ -282,6 +303,10 @@ int main(int argc, char* argv[]) {
 
     if (receiveThread.joinable()) {
         receiveThread.join();
+    }
+
+    if (uiThread.joinable()) {
+        uiThread.join();
     }
 
     if (!simulationMode) {
