@@ -214,6 +214,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::thread recorderThread([&] {
+        std::cerr << "[THREAD] recorder thread running" << std::endl;
         if (simulationMode) {
             recorderSim->start();
         } else {
@@ -224,6 +225,7 @@ int main(int argc, char* argv[]) {
     });
 
     std::thread playerThread([&] {
+        std::cerr << "[THREAD] player thread running" << std::endl;
         if (simulationMode) {
             playerSim->start();
         } else {

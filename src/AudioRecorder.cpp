@@ -55,6 +55,21 @@ int AudioRecorder::processInput(const float* inputBuffer, unsigned long framesPe
     gTimingLogger.add("recorder_hw_push", blockCount + 1, pushLatency);
 
     ++blockCount;
+
+    float peak = 0.0f;
+
+    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
+        float v = std::abs(inputBuffer[i]);
+        if (v > peak) peak = v;
+
+    }
+
+    static uint64_t dbgCount = 0;
+    if (++dbgCount % 100 == 0) {
+        std::cerr << "[MIC] frames=" << framesPerBuffer
+                << " peak=" << peak
+                << std::endl;
+    }
     return 0;
 }
 
@@ -86,8 +101,6 @@ int AudioRecorder::recordCallback(
 }
 
 void AudioRecorder::start() {
-    enableRealtimeThread(0, 30);
-
     PaError err = Pa_OpenDefaultStream(
         &stream,
         CHANNELS,
@@ -113,6 +126,13 @@ void AudioRecorder::start() {
         Pa_CloseStream(stream);
         return;
     }
+
+    std::cerr << "[RECORDER] stream active = "
+              << Pa_IsStreamActive(stream)
+              << std::endl;
+
+    // Move realtime priority here
+    enableRealtimeThread(0, 30);
 
     while (true) {
         Pa_Sleep(1000);
