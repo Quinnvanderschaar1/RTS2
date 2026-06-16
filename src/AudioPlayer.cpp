@@ -7,9 +7,11 @@
 #include <sched.h>
 #include <unistd.h>
 
+#include "Globals.hpp"
+
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
+
 
 static void enableRealtimeThread(int cpu = 1, int priority = 29) {
 #if defined(__linux__)
@@ -94,7 +96,7 @@ void AudioPlayer::start() {
         CHANNELS,
         paFloat32,
         SAMPLE_RATE,
-        FRAMES_10MS,
+        gFramesPerBuffer,
         &AudioPlayer::playCallback,
         this
     );

@@ -7,22 +7,22 @@
 #include <thread>
 #include <iostream>
 
+#include "Globals.hpp"
+
 constexpr int SAMPLE_RATE = 48000;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 10;
-constexpr int BLOCK_SIZE = FRAMES_10MS;
 constexpr double TWO_PI = 6.28318530717958647692;
 constexpr double SIM_TONE_FREQUENCY = 440.0;
 
 AudioRecorderSimulator::AudioRecorderSimulator(AudioFifo& f, WCETStats* e2e) : fifo(f), e2eStats(e2e) {}
 
 void AudioRecorderSimulator::start() {
-    const auto blockDuration = std::chrono::microseconds(1000000LL * FRAMES_10MS / SAMPLE_RATE);
+    const auto blockDuration = std::chrono::microseconds(1000000LL * gFramesPerBuffer / SAMPLE_RATE);
     auto nextWake = std::chrono::steady_clock::now();
-    std::vector<float> buffer(BLOCK_SIZE);
+    std::vector<float> buffer(gFramesPerBuffer);
 
     while (true) {
         auto t0 = std::chrono::steady_clock::now();
-        for (int i = 0; i < BLOCK_SIZE; ++i) {
+        for (int i = 0; i < gFramesPerBuffer; ++i) {
             buffer[i] = 0.5f * static_cast<float>(std::sin(TWO_PI * SIM_TONE_FREQUENCY * phase / SAMPLE_RATE));
             phase += 1.0;
             if (phase >= SAMPLE_RATE) phase -= SAMPLE_RATE;
@@ -58,7 +58,7 @@ void AudioRecorderSimulator::start() {
 AudioPlayerSimulator::AudioPlayerSimulator(AudioFifo& f, WCETStats* e2e) : fifo(f), e2eStats(e2e) {}
 
 void AudioPlayerSimulator::start() {
-    const auto blockDuration = std::chrono::microseconds(1000000LL * FRAMES_10MS / SAMPLE_RATE);
+    const auto blockDuration = std::chrono::microseconds(1000000LL * gFramesPerBuffer / SAMPLE_RATE);
     AudioMixer mixer;
     AudioProcessing processor;
     auto nextPlayback = std::chrono::steady_clock::now();

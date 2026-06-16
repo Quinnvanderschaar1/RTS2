@@ -29,6 +29,7 @@ set(SRC_FILES
     src/ProcessingThreads.cpp
     src/TimingLogger.cpp
     src/Transceiver.cpp
+    src/Globals.cpp
 )
 
 if(NOT USE_SIMULATION OR PORTAUDIO_FOUND)

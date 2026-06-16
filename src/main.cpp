@@ -33,14 +33,14 @@
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 10;
+constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
 constexpr const char* UDP_GROUP = "192.168.50.189";
 constexpr uint16_t UDP_PORT = 5005;
 constexpr int BUTTON_GPIO = 17;
 constexpr int LED_GPIO = 27;
 
 constexpr float LOW_PASS_ALPHA = 0.15f;
-constexpr int ECHO_DELAY_SAMPLES = FRAMES_10MS;
+constexpr int DEFAULT_ECHO_DELAY_SAMPLES = FRAMES_10MS;
 constexpr float ECHO_DECAY = 0.35f;
 
 int main(int argc, char* argv[]) {
@@ -49,6 +49,9 @@ int main(int argc, char* argv[]) {
     bool useUdp = true;
     bool userSpecifiedUdp = false;
     bool useProcessing = true;
+
+    int frameDivisor = 100;
+    int echoDelaySamples = DEFAULT_ECHO_DELAY_SAMPLES;
 
     auto hasPrefix = [](const std::string& value, const std::string& prefix) {
         return value.size() >= prefix.size() &&
@@ -66,6 +69,20 @@ int main(int argc, char* argv[]) {
             useUdp = false;
         } else if (arg == "--np") {
             useProcessing = false;
+        } else if (arg == "--div" && i + 1 < argc) {
+            frameDivisor = std::atoi(argv[++i]);
+
+            if (frameDivisor <= 0) {
+                std::cerr << "Invalid --div value. Must be greater than 0." << std::endl;
+                return 1;
+            }
+
+            echoDelaySamples = SAMPLE_RATE / frameDivisor;
+
+            if (echoDelaySamples <= 0) {
+                std::cerr << "Invalid --div value. SAMPLE_RATE / div must be greater than 0." << std::endl;
+                return 1;
+            }
         } else if (!hasPrefix(arg, "--")) {
             udpGroup = arg;
             userSpecifiedUdp = true;
@@ -84,6 +101,8 @@ int main(int argc, char* argv[]) {
     std::cout << "Audio processing: "
               << (useProcessing ? "enabled" : "disabled")
               << std::endl;
+    std::cout << "Frame divisor: " << frameDivisor << std::endl;
+    std::cout << "Echo delay samples: " << echoDelaySamples << std::endl;
 
     if (!simulationMode) {
         std::cout << "Using UDP address: " << udpGroup << std::endl;
@@ -205,7 +224,7 @@ int main(int argc, char* argv[]) {
             std::ref(lowPassFifo),
             std::ref(echoCancelFifo),
             std::ref(audioProcessing),
-            ECHO_DELAY_SAMPLES,
+            echoDelaySamples,
             ECHO_DECAY
         );
 

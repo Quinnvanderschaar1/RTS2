@@ -7,10 +7,11 @@
 #include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
+#include "Globals.hpp"
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
+
 
 static void enableRealtimeThread(int cpu = 0, int priority = 30) {
 #if defined(__linux__)
@@ -72,8 +73,12 @@ int AudioRecorder::recordCallback(
     AudioRecorder* recorder = static_cast<AudioRecorder*>(userData);
     const float* in = static_cast<const float*>(inputBuffer);
     if (in == nullptr) {
-        static const float silence[FRAMES_10MS] = {0};
-        recorder->processInput(silence, framesPerBuffer);
+        static std::vector<float> silence;
+
+        if (silence.size() != static_cast<size_t>(gFramesPerBuffer)) {
+            silence.assign(gFramesPerBuffer, 0.0f);
+        }
+        recorder->processInput(silence.data(), framesPerBuffer);
     } else {
         recorder->processInput(in, framesPerBuffer);
     }
@@ -89,7 +94,7 @@ void AudioRecorder::start() {
         0,
         paFloat32,
         SAMPLE_RATE,
-        FRAMES_10MS,
+        gFramesPerBuffer,
         &AudioRecorder::recordCallback,
         this
     );
