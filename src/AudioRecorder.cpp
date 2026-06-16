@@ -56,20 +56,6 @@ int AudioRecorder::processInput(const float* inputBuffer, unsigned long framesPe
 
     ++blockCount;
 
-    float peak = 0.0f;
-
-    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
-        float v = std::abs(inputBuffer[i]);
-        if (v > peak) peak = v;
-
-    }
-
-    static uint64_t dbgCount = 0;
-    if (++dbgCount % 100 == 0) {
-        std::cerr << "[MIC] frames=" << framesPerBuffer
-                << " peak=" << peak
-                << std::endl;
-    }
     return 0;
 }
 
