@@ -33,7 +33,7 @@
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
+constexpr int FRAMES_10MS = SAMPLE_RATE / 10;
 constexpr const char* UDP_GROUP = "192.168.50.189";
 constexpr uint16_t UDP_PORT = 5005;
 constexpr int BUTTON_GPIO = 17;

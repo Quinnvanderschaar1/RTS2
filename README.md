@@ -16,12 +16,13 @@ sudo apt install libstdc++6
 
 
 ## build
+Install cross compilers:
 ```
 sudo apt install mingw-w64
 sudo apt install g++-aarch64-linux-gnu
 ```
 
-
+Build program:
 ```
 mkdir build
 cd build
@@ -33,6 +34,12 @@ cpack
 ## Running
 ```
 ./conferencing ip_address_other_device
+```
+
+Analyze cpu usage:
+```
+htop
+top -H -p $(pidof conferencing)
 ```
 
 # RTS2 Real-Time Conferencing System

@@ -56,11 +56,11 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
         if (block.sendNs != 0) {
             uint64_t latency = playbackNs - block.sendNs;
             e2eStats->update(latency);
-            gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
+            //gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
         } else if (block.captureNs != 0) {
             uint64_t latency = playbackNs - block.captureNs;
             e2eStats->update(latency);
-            gTimingLogger.add("player_local_end_to_end", blockCount + 1, latency);
+            //gTimingLogger.add("player_local_end_to_end", blockCount + 1, latency);
         }
     }
 

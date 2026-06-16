@@ -8,7 +8,7 @@
 #include <iostream>
 
 constexpr int SAMPLE_RATE = 48000;
-constexpr int FRAMES_10MS = SAMPLE_RATE / 100;
+constexpr int FRAMES_10MS = SAMPLE_RATE / 10;
 constexpr int BLOCK_SIZE = FRAMES_10MS;
 constexpr double TWO_PI = 6.28318530717958647692;
 constexpr double SIM_TONE_FREQUENCY = 440.0;
