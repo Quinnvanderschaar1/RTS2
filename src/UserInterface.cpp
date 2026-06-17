@@ -1,4 +1,5 @@
 #include "UserInterface.hpp"
+#include "TimingLogger.hpp"
 
 #include <fstream>
 #include <string>
@@ -78,6 +79,15 @@ bool UserInterface::isKeyboardPressed() {
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
     fcntl(STDIN_FILENO, F_SETFL, oldFlags);
+
+    if (ch == 'x' || ch == 'X') {
+        printf("Saving CSV files and exiting...\n");
+        gTimingLogger.saveCSV("timing_report.csv");
+        gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
+        gTimingLogger.saveQueueCSV("queue_latency.csv");
+        gTimingLogger.saveNetworkCSV("network_jitter.csv");
+        std::exit(0);
+    }
 
     return ch == ' ';
 }

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "AudioFifo.hpp"
 
 /**
  * @class UdpReceiver
@@ -20,4 +21,5 @@ public:
 
     std::string receiveMessage(size_t maxSize = 4096);
     std::vector<float> receiveFloatData(size_t maxFloats);
+    AudioBlock receiveBlock(size_t maxFloats);
 };
