@@ -121,10 +121,10 @@ int main(int argc, char* argv[]) {
         std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     }
 
-    AudioFifo micFifo(8);
-    AudioFifo lowPassFifo(8);
-    AudioFifo echoCancelFifo(8);
-    AudioFifo playbackFifo(8);
+    AudioFifo micFifo(FIFO_SIZE);
+    AudioFifo lowPassFifo(FIFO_SIZE);
+    AudioFifo echoCancelFifo(FIFO_SIZE);
+    AudioFifo playbackFifo(FIFO_SIZE);
 
     AudioProcessing audioProcessing;
 
