@@ -73,6 +73,8 @@ int main(int argc, char* argv[]) {
             useProcessing = false;
         } else if (arg == "--div" && i + 1 < argc) {
             frameDivisor = std::atoi(argv[++i]);
+        } else if (arg == "--fifo" && i + 1 < argc) {
+            FIFO_SIZE = std::atoi(argv[++i]);
 
             if (frameDivisor <= 0) {
                 std::cerr << "Invalid --div value. Must be greater than 0." << std::endl;
