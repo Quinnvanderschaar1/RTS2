@@ -13,7 +13,7 @@ constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 
 
-static void enableRealtimeThread(int cpu = 1, int priority = 29) {
+static void enableRealtimeThread(int cpu = 1, int priority = 70) {
 #if defined(__linux__)
     cpu_set_t cpus;
     CPU_ZERO(&cpus);
