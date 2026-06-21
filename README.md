@@ -45,7 +45,7 @@ top -H -p $(pidof conferencing)
 ## analysis
 
 sudo prlimit --rtprio=99 --pid=$$
-
+sudo setcap cap_sys_nice+ep ./conferencing
 permissions:
 ```
 sudo prlimit --rtprio=99 --pid=$$
