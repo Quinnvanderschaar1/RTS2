@@ -126,6 +126,8 @@ int main(int argc, char* argv[]) {
     AudioFifo micFifo(FIFO_SIZE);
     AudioFifo lowPassFifo(FIFO_SIZE);
     AudioFifo echoCancelFifo(FIFO_SIZE);
+    AudioFifo audioEncoderFifo(FIFO_SIZE);
+    AudioFifo audioDecoderFifo(FIFO_SIZE);
     AudioFifo playbackFifo(FIFO_SIZE);
 
     AudioProcessing audioProcessing;
@@ -239,6 +241,8 @@ int main(int argc, char* argv[]) {
 
     std::thread lowPassThread;
     std::thread echoCancelThread;
+    std::thread audioEncoderThread;
+    std::thread audioDecoderThread;
     std::thread transmitThread;
 
     if (useProcessing) {
@@ -259,9 +263,23 @@ int main(int argc, char* argv[]) {
             ECHO_DECAY
         );
 
+        audioEncoderThread = std::thread(
+            audioEncoderThreadLoop,
+            std::ref(echoCancelFifo),
+            std::ref(audioEncoderFifo),
+            std::ref(audioProcessing)
+        );
+
+        audioDecoderThread = std::thread(
+            audioDecoderThreadLoop,
+            std::ref(audioDecoderFifo),
+            std::ref(playbackFifo),
+            std::ref(audioProcessing)
+        );
+
         transmitThread = std::thread([&] {
             transmitLoop(
-                echoCancelFifo,
+                audioEncoderFifo,
                 playbackFifo,
                 isActive,
                 setLed,
@@ -284,11 +302,16 @@ int main(int argc, char* argv[]) {
 
     std::thread receiveThread;
 
-    if (useUdp && receiver) {
+    if (useUdp && receiver && useProcessing) {
+        receiveThread = std::thread([&] {
+            receiveLoop(audioDecoderFifo, *receiver);
+        });
+    }
+    else if (useUdp && receiver) {
         receiveThread = std::thread([&] {
             receiveLoop(playbackFifo, *receiver);
         });
-    }
+     }
 
     std::cout << "Conferencing started..." << std::endl;
 
@@ -301,6 +324,18 @@ int main(int argc, char* argv[]) {
 
     if (echoCancelThread.joinable()) {
         echoCancelThread.join();
+    }
+
+    if (echoCancelThread.joinable()) {
+        echoCancelThread.join();
+    }
+
+    if (audioEncoderThread.joinable()) {
+        audioEncoderThread.join();
+    }
+
+    if (audioDecoderThread.joinable()) {
+        audioDecoderThread.join();
     }
 
     transmitThread.join();

@@ -65,3 +65,64 @@ void echoCancelThreadLoop(
         ++echoCount;
     }
 }
+
+void audioEncoderThreadLoop(
+    AudioFifo& source,
+    AudioFifo& destination,
+    AudioProcessing& processing
+) {
+    uint64_t EncoderCount = 0;
+
+    while (true) {
+        auto tPop0 = std::chrono::steady_clock::now();
+        AudioBlock block = source.pop();
+        auto tPop1 = std::chrono::steady_clock::now();
+        uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPop1 - tPop0).count();
+        gTimingLogger.add("audioencoder_pop", EncoderCount + 1, popLatency);
+
+        auto tProc0 = std::chrono::steady_clock::now();
+        block.samples = processing.audioEncoding(block.samples);
+        auto tProc1 = std::chrono::steady_clock::now();
+        uint64_t procLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count();
+        gTimingLogger.add("audioencoder_proc", EncoderCount + 1, procLatency);
+
+        auto tPush0 = std::chrono::steady_clock::now();
+        destination.push(block);
+        auto tPush1 = std::chrono::steady_clock::now();
+        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+        gTimingLogger.add("audioencoder_push", EncoderCount + 1, pushLatency);
+
+        ++EncoderCount;
+    }
+}
+
+void audioDecoderThreadLoop(
+    AudioFifo& source,
+    AudioFifo& destination,
+    AudioProcessing& processing
+) {
+    uint64_t DecoderCount = 0;
+
+    while (true) {
+        auto tPop0 = std::chrono::steady_clock::now();
+        AudioBlock block = source.pop();
+        auto tPop1 = std::chrono::steady_clock::now();
+        uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPop1 - tPop0).count();
+        gTimingLogger.add("audiordecoder_pop", DecoderCount + 1, popLatency);
+
+        auto tProc0 = std::chrono::steady_clock::now();
+        block.samples = processing.audioDecoding(block.samples);
+        auto tProc1 = std::chrono::steady_clock::now();
+        uint64_t procLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count();
+        gTimingLogger.add("audiordecoder_proc", DecoderCount + 1, procLatency);
+
+        auto tPush0 = std::chrono::steady_clock::now();
+        destination.push(block);
+        auto tPush1 = std::chrono::steady_clock::now();
+        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+        gTimingLogger.add("audiordecoder_push", DecoderCount + 1, pushLatency);
+
+        ++DecoderCount;
+    }
+}
+
