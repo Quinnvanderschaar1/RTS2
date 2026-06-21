@@ -28,6 +28,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <atomic>
+#include <pthread.h>
 
 #ifndef USE_SIMULATION
 #include <portaudio.h>
@@ -45,8 +46,12 @@ constexpr float LOW_PASS_ALPHA = 0.15f;
 constexpr int DEFAULT_ECHO_DELAY_SAMPLES = FRAMES_10MS;
 constexpr float ECHO_DECAY = 0.35f;
 
+static void setThreadName(const char* name) {
+    pthread_setname_np(pthread_self(), name); // Linux limit: 15 chars + null
+}
+
 int main(int argc, char* argv[]) {
-    bool simulationMode = false; // hardware mode is now default
+    bool simulationMode = false;
     std::string udpGroup = UDP_GROUP;
     bool useUdp = true;
     bool userSpecifiedUdp = false;
@@ -75,23 +80,25 @@ int main(int argc, char* argv[]) {
             frameDivisor = std::atoi(argv[++i]);
         } else if (arg == "--fifo" && i + 1 < argc) {
             FIFO_SIZE = std::atoi(argv[++i]);
-
-            if (frameDivisor <= 0) {
-                std::cerr << "Invalid --div value. Must be greater than 0." << std::endl;
-                return 1;
-            }
-
-            echoDelaySamples = SAMPLE_RATE / frameDivisor;
-
-            if (echoDelaySamples <= 0) {
-                std::cerr << "Invalid --div value. SAMPLE_RATE / div must be greater than 0." << std::endl;
-                return 1;
-            }
         } else if (!hasPrefix(arg, "--")) {
             udpGroup = arg;
             userSpecifiedUdp = true;
             simulationMode = false;
         }
+    }
+
+    if (frameDivisor <= 0) {
+        std::cerr << "Invalid --div value. Must be greater than 0." << std::endl;
+        return 1;
+    }
+
+    gFrameDivisor = frameDivisor;
+    gFramesPerBuffer = SAMPLE_RATE / frameDivisor;
+    echoDelaySamples = gFramesPerBuffer;
+
+    if (echoDelaySamples <= 0) {
+        std::cerr << "Invalid --div value. SAMPLE_RATE / div must be greater than 0." << std::endl;
+        return 1;
     }
 
     std::atexit([]() {
@@ -101,27 +108,20 @@ int main(int argc, char* argv[]) {
         gTimingLogger.saveNetworkCSV("network_jitter.csv");
     });
 
-    gFrameDivisor = frameDivisor;
-    gFramesPerBuffer = SAMPLE_RATE / frameDivisor;
-    echoDelaySamples = gFramesPerBuffer;
-
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
-    std::cout << "Audio processing: "
-              << (useProcessing ? "enabled" : "disabled")
-              << std::endl;
+    std::cout << "Audio processing: " << (useProcessing ? "enabled" : "disabled") << std::endl;
     std::cout << "Frame divisor: " << frameDivisor << std::endl;
     std::cout << "Frames per buffer: " << gFramesPerBuffer << std::endl;
     std::cout << "Echo delay samples: " << echoDelaySamples << std::endl;
 
     if (!simulationMode) {
         std::cout << "Using UDP address: " << udpGroup << std::endl;
-        std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
-        std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     } else {
         std::cout << "Simulation active: microphone and playback are both simulated." << std::endl;
-        std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
-        std::cout << "Press X to save timing_report.csv and exit." << std::endl;
     }
+
+    std::cout << "Press SPACE to toggle transmit ON/OFF." << std::endl;
+    std::cout << "Press X to save timing_report.csv and exit." << std::endl;
 
     AudioFifo micFifo(FIFO_SIZE);
     AudioFifo lowPassFifo(FIFO_SIZE);
@@ -196,6 +196,7 @@ int main(int argc, char* argv[]) {
         receiver = std::make_unique<UdpReceiver>(udpGroup, UDP_PORT);
 
         uiThread = std::thread([&] {
+            setThreadName("ui");
             while (true) {
                 bool active = ui->isButtonPressed();
                 transmitActive.store(active);
@@ -208,9 +209,7 @@ int main(int argc, char* argv[]) {
             return transmitActive.load();
         };
 
-        setLed = [](bool) {
-            // LED is handled by uiThread
-        };
+        setLed = [](bool) {};
 #else
         std::cerr << "Hardware mode is disabled in this build. Run without -DUSE_SIMULATION=ON." << std::endl;
         return 1;
@@ -218,6 +217,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::thread recorderThread([&] {
+        setThreadName("recorder");
         std::cerr << "[THREAD] recorder thread running" << std::endl;
         if (simulationMode) {
             recorderSim->start();
@@ -229,6 +229,7 @@ int main(int argc, char* argv[]) {
     });
 
     std::thread playerThread([&] {
+        setThreadName("player");
         std::cerr << "[THREAD] player thread running" << std::endl;
         if (simulationMode) {
             playerSim->start();
@@ -246,13 +247,15 @@ int main(int argc, char* argv[]) {
     std::thread transmitThread;
 
     if (useProcessing) {
-        lowPassThread = std::thread(
-            lowPassThreadLoop,
-            std::ref(micFifo),
-            std::ref(lowPassFifo),
-            std::ref(audioProcessing),
-            LOW_PASS_ALPHA
-        );
+        lowPassThread = std::thread([&] {
+            setThreadName("lowpass");
+            lowPassThreadLoop(
+                micFifo,
+                lowPassFifo,
+                audioProcessing,
+                LOW_PASS_ALPHA
+            );
+        });
 
         echoCancelThread = std::thread(
             echoCancelThreadLoop,
@@ -263,21 +266,8 @@ int main(int argc, char* argv[]) {
             ECHO_DECAY
         );
 
-        audioEncoderThread = std::thread(
-            audioEncoderThreadLoop,
-            std::ref(echoCancelFifo),
-            std::ref(audioEncoderFifo),
-            std::ref(audioProcessing)
-        );
-
-        audioDecoderThread = std::thread(
-            audioDecoderThreadLoop,
-            std::ref(audioDecoderFifo),
-            std::ref(playbackFifo),
-            std::ref(audioProcessing)
-        );
-
         transmitThread = std::thread([&] {
+            setThreadName("transmit");
             transmitLoop(
                 audioEncoderFifo,
                 playbackFifo,
@@ -289,6 +279,7 @@ int main(int argc, char* argv[]) {
         });
     } else {
         transmitThread = std::thread([&] {
+            setThreadName("transmit");
             transmitLoop(
                 micFifo,
                 playbackFifo,
@@ -304,11 +295,13 @@ int main(int argc, char* argv[]) {
 
     if (useUdp && receiver && useProcessing) {
         receiveThread = std::thread([&] {
+            setThreadName("receive");
             receiveLoop(audioDecoderFifo, *receiver);
         });
     }
     else if (useUdp && receiver) {
         receiveThread = std::thread([&] {
+            setThreadName("receive");
             receiveLoop(playbackFifo, *receiver);
         });
      }
