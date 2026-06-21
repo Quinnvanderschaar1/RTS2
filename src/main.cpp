@@ -250,21 +250,41 @@ int main(int argc, char* argv[]) {
         lowPassThread = std::thread([&] {
             setThreadName("lowpass");
             lowPassThreadLoop(
-                micFifo,
-                lowPassFifo,
-                audioProcessing,
-                LOW_PASS_ALPHA
+            std::ref(micFifo),
+            std::ref(lowPassFifo),
+            std::ref(audioProcessing),
+            LOW_PASS_ALPHA
             );
         });
 
-        echoCancelThread = std::thread(
-            echoCancelThreadLoop,
+        echoCancelThread = std::thread([&] {
+            setThreadName("echo_cancel");
+            echoCancelThreadLoop(
             std::ref(lowPassFifo),
             std::ref(echoCancelFifo),
             std::ref(audioProcessing),
             echoDelaySamples,
             ECHO_DECAY
-        );
+            );
+        });
+
+        audioEncoderThread = std::thread([&] {
+            setThreadName("Encoding");
+            audioEncoderThreadLoop(
+            std::ref(echoCancelFifo),
+            std::ref(audioEncoderFifo),
+            std::ref(audioProcessing)
+            );
+        });
+
+        audioDecoderThread = std::thread([&] {
+            setThreadName("Decoding");
+            audioDecoderThreadLoop(
+            std::ref(audioDecoderFifo),
+            std::ref(playbackFifo),
+            std::ref(audioProcessing)
+            );
+        });
 
         transmitThread = std::thread([&] {
             setThreadName("transmit");
