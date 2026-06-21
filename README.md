@@ -42,6 +42,29 @@ htop
 top -H -p $(pidof conferencing)
 ```
 
+## analysis
+
+sudo prlimit --rtprio=99 --pid=$$
+
+permissions:
+```
+sudo prlimit --rtprio=99 --pid=$$
+sudo mount -o remount,mode=755 /sys/kernel/tracing/
+sudo chmod -R a+rX /sys/kernel/tracing/events/sched
+sudo sysctl kernel.perf_event_paranoid=-1
+```
+
+generate and visualize plot
+```
+perf sched record -- ./conferencing 0.0.0.0 --div 200 --fifo 8
+hotspot perf.data
+```
+
+
+sudo trace-cmd record -e sched_switch -e sched_wakeup --   sudo -E -u "$USER" env   XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR"   PULSE_SERVER="$PULSE_SERVER"   DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS"   ./conferencing 0.0.0.0 --div 200 --fifo 10
+
+kernelshark trace.dat
+
 # RTS2 Real-Time Conferencing System
 
 A real-time conferencing system developed for the Real-Time Systems 2 course.
