@@ -1,0 +1,42 @@
+\doxysection{Simulated\+Audio.\+hpp}
+\hypertarget{SimulatedAudio_8hpp_source}{}\label{SimulatedAudio_8hpp_source}\index{include/SimulatedAudio.hpp@{include/SimulatedAudio.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}AudioFifo.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}wcet.hpp"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <atomic>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00015\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioRecorderSimulator}{AudioRecorderSimulator}}\ \{}
+\DoxyCodeLine{00016\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00017\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keywordtype}{double}\ phase\ =\ 0.0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00019\ \ \ \ \ std::atomic<uint64\_t>\ blockCount\{0\};\ }
+\DoxyCodeLine{00020\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}\ genStats;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00021\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}\ pushStats;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00022\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats\{\textcolor{keyword}{nullptr}\};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classAudioRecorderSimulator_a8d8b7db928344023ed07800f40bef520}{AudioRecorderSimulator}}(\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo,\ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classAudioRecorderSimulator_a83cb3e971a6fe42f7192d18e7ceee36a}{start}}();}
+\DoxyCodeLine{00039\ \};}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00047\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioPlayerSimulator}{AudioPlayerSimulator}}\ \{}
+\DoxyCodeLine{00048\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00049\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00050\ \ \ \ \ std::atomic<uint64\_t>\ blockCount\{0\};\ }
+\DoxyCodeLine{00051\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}\ popStats;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00052\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}\ consumeStats;\ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00053\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats\{\textcolor{keyword}{nullptr}\};\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classAudioPlayerSimulator_a3fe5a85e8adb060cf13a65f214b621f7}{AudioPlayerSimulator}}(\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo,\ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats\ =\ \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classAudioPlayerSimulator_a299746eef31a329100737ccdad7e2397}{start}}();}
+\DoxyCodeLine{00070\ \};}
+
+\end{DoxyCode}

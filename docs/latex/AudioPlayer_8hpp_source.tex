@@ -1,0 +1,40 @@
+\doxysection{Audio\+Player.\+hpp}
+\hypertarget{AudioPlayer_8hpp_source}{}\label{AudioPlayer_8hpp_source}\index{include/AudioPlayer.hpp@{include/AudioPlayer.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}AudioFifo.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}wcet.hpp"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <portaudio.h>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00014\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioPlayer}{AudioPlayer}}\ \{}
+\DoxyCodeLine{00015\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00019\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo;}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00024\ \ \ \ \ PaStream*\ stream\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00029\ \ \ \ \ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats\ =\ \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00034\ \ \ \ \ uint64\_t\ blockCount\ =\ 0;}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classAudioPlayer_a2e1f01f22961fff1d009d115e4f9d276}{AudioPlayer}}(\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo);}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{explicit}\ \mbox{\hyperlink{classAudioPlayer}{AudioPlayer}}(\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ fifo,\ \mbox{\hyperlink{structWCETStats}{WCETStats}}*\ e2eStats);}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classAudioPlayer_a700d56358d7c4dded7124a6007a77a4f}{start}}();}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keyword}{static}\ \textcolor{keywordtype}{int}\ playCallback(}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{void}*\ inputBuffer,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ outputBuffer,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ framesPerBuffer,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ PaStreamCallbackTimeInfo*\ timeInfo,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ PaStreamCallbackFlags\ statusFlags,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{void}*\ userData}
+\DoxyCodeLine{00062\ \ \ \ \ );}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordtype}{int}\ fillOutput(\textcolor{keywordtype}{float}*\ outputBuffer,\ \textcolor{keywordtype}{unsigned}\ \textcolor{keywordtype}{long}\ framesPerBuffer);}
+\DoxyCodeLine{00064\ \};}
+
+\end{DoxyCode}

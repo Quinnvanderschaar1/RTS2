@@ -1,0 +1,61 @@
+\doxysection{Audio\+Recorder\+Simulator Class Reference}
+\hypertarget{classAudioRecorderSimulator}{}\label{classAudioRecorderSimulator}\index{AudioRecorderSimulator@{AudioRecorderSimulator}}
+
+
+Simulates an audio recorder.  
+
+
+
+
+{\ttfamily \#include $<$Simulated\+Audio.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAudioRecorderSimulator_a8d8b7db928344023ed07800f40bef520}{Audio\+Recorder\+Simulator}} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo, \mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}e2e\+Stats=nullptr)
+\begin{DoxyCompactList}\small\item\em Constructs a simulated audio recorder. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classAudioRecorderSimulator_a83cb3e971a6fe42f7192d18e7ceee36a}{start}} ()
+\begin{DoxyCompactList}\small\item\em Starts the simulated recorder. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Simulates an audio recorder. 
+
+Generates synthetic audio samples at the configured sample rate and pushes them into the audio FIFO at the configured block interval. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classAudioRecorderSimulator_a8d8b7db928344023ed07800f40bef520}\label{classAudioRecorderSimulator_a8d8b7db928344023ed07800f40bef520} 
+\index{AudioRecorderSimulator@{AudioRecorderSimulator}!AudioRecorderSimulator@{AudioRecorderSimulator}}
+\index{AudioRecorderSimulator@{AudioRecorderSimulator}!AudioRecorderSimulator@{AudioRecorderSimulator}}
+\doxysubsubsection{\texorpdfstring{AudioRecorderSimulator()}{AudioRecorderSimulator()}}
+{\footnotesize\ttfamily Audio\+Recorder\+Simulator\+::\+Audio\+Recorder\+Simulator (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&}]{fifo,  }\item[{\mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}}]{e2e\+Stats = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs a simulated audio recorder. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fifo} & FIFO receiving generated audio blocks. \\
+\hline
+{\em e2e\+Stats} & Optional end-\/to-\/end latency statistics collector. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioRecorderSimulator_a83cb3e971a6fe42f7192d18e7ceee36a}\label{classAudioRecorderSimulator_a83cb3e971a6fe42f7192d18e7ceee36a} 
+\index{AudioRecorderSimulator@{AudioRecorderSimulator}!start@{start}}
+\index{start@{start}!AudioRecorderSimulator@{AudioRecorderSimulator}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void Audio\+Recorder\+Simulator\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Starts the simulated recorder. 
+
+Continuously generates audio blocks and pushes them into the FIFO. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Simulated\+Audio.\+hpp\end{DoxyCompactItemize}

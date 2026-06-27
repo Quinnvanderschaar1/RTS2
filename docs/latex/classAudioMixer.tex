@@ -1,0 +1,47 @@
+\doxysection{Audio\+Mixer Class Reference}
+\hypertarget{classAudioMixer}{}\label{classAudioMixer}\index{AudioMixer@{AudioMixer}}
+
+
+Mixes several audio input signals into one output signal.  
+
+
+
+
+{\ttfamily \#include $<$Audio\+Mixer.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioMixer_a38a358b29bceb376511822e84537c780}{mix}} (const std\+::vector$<$ std\+::vector$<$ float $>$ $>$ \&inputs) const
+\begin{DoxyCompactList}\small\item\em Mix multiple audio buffers into one buffer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Mixes several audio input signals into one output signal. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioMixer_a38a358b29bceb376511822e84537c780}\label{classAudioMixer_a38a358b29bceb376511822e84537c780} 
+\index{AudioMixer@{AudioMixer}!mix@{mix}}
+\index{mix@{mix}!AudioMixer@{AudioMixer}}
+\doxysubsubsection{\texorpdfstring{mix()}{mix()}}
+{\footnotesize\ttfamily std\+::vector$<$ float $>$ Audio\+Mixer\+::mix (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ std\+::vector$<$ float $>$ $>$ \&}]{inputs }\end{DoxyParamCaption}) const}
+
+
+
+Mix multiple audio buffers into one buffer. 
+
+All input buffers should contain float samples in range \mbox{[}-\/1.\+0, 1.\+0\mbox{]}. The output is averaged to avoid clipping.
+
+
+\begin{DoxyParams}{Parameters}
+{\em inputs} & List of input audio buffers. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Mixed output buffer. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Audio\+Mixer.\+hpp\end{DoxyCompactItemize}
