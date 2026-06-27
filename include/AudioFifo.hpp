@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstdint>
 #include <pthread.h>
+#include "Globals.hpp"
 
 /**
  * @class AudioFifo
@@ -52,7 +53,7 @@ public:
      * @brief Constructs an empty audio FIFO.
      * @param capacity Maximum number of blocks to buffer.
      */
-    AudioFifo(size_t capacity = 8);
+    AudioFifo(size_t capacity = FIFO_SIZE);
 
     /**
      * @brief Destroys the audio FIFO and releases synchronization resources.

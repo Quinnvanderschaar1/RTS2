@@ -1,0 +1,23 @@
+\doxysection{wcet.\+hpp}
+\hypertarget{wcet_8hpp_source}{}\label{wcet_8hpp_source}\index{include/wcet.hpp@{include/wcet.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structWCETStats}{WCETStats}}\ \{}
+\DoxyCodeLine{00006\ \ \ \ \ uint64\_t\ count\{0\};}
+\DoxyCodeLine{00007\ \ \ \ \ uint64\_t\ totalNs\{0\};}
+\DoxyCodeLine{00008\ \ \ \ \ uint64\_t\ maxNs\{0\};}
+\DoxyCodeLine{00009\ \ \ \ \ uint64\_t\ minNs\{UINT64\_MAX\};}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \ \ \ \ \textcolor{keywordtype}{void}\ update(uint64\_t\ v)\ \{}
+\DoxyCodeLine{00012\ \ \ \ \ \ \ \ \ ++count;}
+\DoxyCodeLine{00013\ \ \ \ \ \ \ \ \ totalNs\ +=\ v;}
+\DoxyCodeLine{00014\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v\ >\ maxNs)\ maxNs\ =\ v;}
+\DoxyCodeLine{00015\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (v\ <\ minNs)\ minNs\ =\ v;}
+\DoxyCodeLine{00016\ \ \ \ \ \}}
+\DoxyCodeLine{00017\ \};}
+
+\end{DoxyCode}

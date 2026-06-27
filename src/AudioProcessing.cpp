@@ -1,5 +1,6 @@
 #include "AudioProcessing.hpp"
 #include <cstddef>
+#include <cmath>
 
 std::vector<float> AudioProcessing::lowPass(
     const std::vector<float>& input,
@@ -39,5 +40,36 @@ std::vector<float> AudioProcessing::echoCancellation(
         if (output[i] < -1.0f) output[i] = -1.0f;
     }
 
+    return output;
+}
+
+std::vector<float> AudioProcessing::audioEncoding(
+    const std::vector<float>& input
+) {
+    std::vector<float> output(input.size());
+    const float MU = 255.0f;
+    for (size_t i = 0; i < input.size(); i++) {
+        float sign = (input[i] < 0) ? -1.0f : 1.0f;
+        float x = fabs(input[i]);
+
+        float encoded = sign * (logf(1 + MU * x) / logf(1 + MU));
+        output[i] = encoded;
+    }
+    return output;
+}
+
+std::vector<float> AudioProcessing::audioDecoding(
+    const std::vector<float>& input
+) {
+    const float MU = 255.0f;
+    std::vector<float> output(input.size());
+    
+    for (size_t i = 0; i < input.size(); i++) {
+    float sign = (input[i] < 0) ? -1.0f : 1.0f;
+    float x = fabs(input[i]);
+
+    float decoded = sign * ((powf(1 + MU, x) - 1) / MU);
+     output[i] = decoded;
+    }
     return output;
 }

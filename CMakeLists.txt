@@ -94,4 +94,9 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
 endif()
 
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/conferencing.1
+    DESTINATION share/man/man1
+)
+
+
 include(CPack)

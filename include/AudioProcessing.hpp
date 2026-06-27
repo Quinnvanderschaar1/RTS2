@@ -36,4 +36,24 @@ public:
         int delaySamples,
         float decay
     );
+
+    /**
+     * @brief Applies simple audio encoding.
+     *
+     * @param input Input audio samples.
+     * @return Encoded audio samples.
+     */
+    std::vector<float> audioEncoding(
+        const std::vector<float>& input
+    );
+
+    /**
+     * @brief Applies simple audio decoding.
+     *
+     * @param input Input audio samples.
+     * @return Decoded audio samples.
+     */
+    std::vector<float> audioDecoding(
+        const std::vector<float>& input
+    );
 };

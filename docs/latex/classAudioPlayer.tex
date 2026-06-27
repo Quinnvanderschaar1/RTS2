@@ -1,0 +1,62 @@
+\doxysection{Audio\+Player Class Reference}
+\hypertarget{classAudioPlayer}{}\label{classAudioPlayer}\index{AudioPlayer@{AudioPlayer}}
+
+
+Audio playback class using Port\+Audio.  
+
+
+
+
+{\ttfamily \#include $<$Audio\+Player.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAudioPlayer_a2e1f01f22961fff1d009d115e4f9d276}{Audio\+Player}} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo)
+\begin{DoxyCompactList}\small\item\em Constructs an \doxylink{classAudioPlayer}{Audio\+Player}. \end{DoxyCompactList}\item 
+\Hypertarget{classAudioPlayer_a9cc90549ae2e20a9d1cec696bc198c29}\label{classAudioPlayer_a9cc90549ae2e20a9d1cec696bc198c29} 
+{\bfseries Audio\+Player} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo, \mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}e2e\+Stats)
+\item 
+void \mbox{\hyperlink{classAudioPlayer_a700d56358d7c4dded7124a6007a77a4f}{start}} ()
+\begin{DoxyCompactList}\small\item\em Starts the playback loop. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Audio playback class using Port\+Audio. 
+
+\doxylink{classAudioPlayer}{Audio\+Player} continuously retrieves audio blocks from an \doxylink{classAudioFifo}{Audio\+Fifo} instance and plays them back through the default audio output device. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classAudioPlayer_a2e1f01f22961fff1d009d115e4f9d276}\label{classAudioPlayer_a2e1f01f22961fff1d009d115e4f9d276} 
+\index{AudioPlayer@{AudioPlayer}!AudioPlayer@{AudioPlayer}}
+\index{AudioPlayer@{AudioPlayer}!AudioPlayer@{AudioPlayer}}
+\doxysubsubsection{\texorpdfstring{AudioPlayer()}{AudioPlayer()}}
+{\footnotesize\ttfamily Audio\+Player\+::\+Audio\+Player (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&}]{fifo }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs an \doxylink{classAudioPlayer}{Audio\+Player}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fifo} & Reference to the audio FIFO used for playback. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioPlayer_a700d56358d7c4dded7124a6007a77a4f}\label{classAudioPlayer_a700d56358d7c4dded7124a6007a77a4f} 
+\index{AudioPlayer@{AudioPlayer}!start@{start}}
+\index{start@{start}!AudioPlayer@{AudioPlayer}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void Audio\+Player\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Starts the playback loop. 
+
+Opens the Port\+Audio output stream and continuously plays audio blocks received from the FIFO. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Audio\+Player.\+hpp\end{DoxyCompactItemize}
