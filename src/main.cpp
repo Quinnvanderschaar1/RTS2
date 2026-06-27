@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
     bool userSpecifiedUdp = false;
     bool useProcessing = true;
 
-    int frameDivisor = 100;
+    int audioMs = 10;
+    int splitDivisor = 10;
     int echoDelaySamples = DEFAULT_ECHO_DELAY_SAMPLES;
 
     auto hasPrefix = [](const std::string& value, const std::string& prefix) {
@@ -76,8 +77,10 @@ int main(int argc, char* argv[]) {
             useUdp = false;
         } else if (arg == "--np") {
             useProcessing = false;
-        } else if (arg == "--div" && i + 1 < argc) {
-            frameDivisor = std::atoi(argv[++i]);
+        } else if (arg == "--ms" && i + 1 < argc) {
+            audioMs = std::atoi(argv[++i]);
+        } else if (arg == "--split" && i + 1 < argc) {
+            splitDivisor = std::atoi(argv[++i]);
         } else if (arg == "--fifo" && i + 1 < argc) {
             FIFO_SIZE = std::atoi(argv[++i]);
         }else if (arg == "--loop" && i + 1 < argc) {
@@ -89,15 +92,35 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if (frameDivisor <= 0) {
-        std::cerr << "Invalid --div value. Must be greater than 0." << std::endl;
+    if (audioMs <= 0) {
+        std::cerr << "Invalid --ms value. Must be greater than 0." << std::endl;
         return 1;
     }
 
-    gFrameDivisor = frameDivisor;
-    gFramesPerBuffer = SAMPLE_RATE / frameDivisor;
-    echoDelaySamples = gFramesPerBuffer;
+    if (splitDivisor <= 0) {
+        std::cerr << "Invalid --split value. Must be greater than 0." << std::endl;
+        return 1;
+    }
 
+    gAudioMs = audioMs;
+    gSplitDivisor = splitDivisor;
+
+    gFramesPerBuffer = SAMPLE_RATE * gAudioMs / 1000;
+
+    if (gFramesPerBuffer <= 0) {
+        std::cerr << "Invalid --ms value. Frames per buffer became 0." << std::endl;
+        return 1;
+    }
+
+    if (gFramesPerBuffer % gSplitDivisor != 0) {
+        std::cerr << "Invalid --split value. Frames per buffer must be divisible by split divisor." << std::endl;
+        return 1;
+    }
+
+    gProcessFrames = gFramesPerBuffer / gSplitDivisor;
+    gBlocksPerPacket = gSplitDivisor;
+
+    echoDelaySamples = gFramesPerBuffer;
     if (echoDelaySamples <= 0) {
         std::cerr << "Invalid --div value. SAMPLE_RATE / div must be greater than 0." << std::endl;
         return 1;
@@ -112,8 +135,12 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Mode: " << (simulationMode ? "simulation" : "hardware") << std::endl;
     std::cout << "Audio processing: " << (useProcessing ? "enabled" : "disabled") << std::endl;
-    std::cout << "Frame divisor: " << frameDivisor << std::endl;
+    std::cout << "Audio block ms: " << gAudioMs << std::endl;
     std::cout << "Frames per buffer: " << gFramesPerBuffer << std::endl;
+    std::cout << "Split divisor: " << gSplitDivisor << std::endl;
+    std::cout << "Process frames: " << gProcessFrames << std::endl;
+    std::cout << "Blocks per packet: " << gBlocksPerPacket << std::endl;
+
     std::cout << "Echo delay samples: " << echoDelaySamples << std::endl;
 
     if (!simulationMode) {

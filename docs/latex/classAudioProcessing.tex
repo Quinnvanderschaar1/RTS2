@@ -1,0 +1,113 @@
+\doxysection{Audio\+Processing Class Reference}
+\hypertarget{classAudioProcessing}{}\label{classAudioProcessing}\index{AudioProcessing@{AudioProcessing}}
+
+
+Provides basic audio processing functions.  
+
+
+
+
+{\ttfamily \#include $<$Audio\+Processing.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1}{low\+Pass}} (const std\+::vector$<$ float $>$ \&input, float alpha)
+\begin{DoxyCompactList}\small\item\em Applies a simple first-\/order low-\/pass filter. \end{DoxyCompactList}\item 
+std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_ae53c78e330851ea0e21c9ab1ebb25122}{echo\+Cancellation}} (const std\+::vector$<$ float $>$ \&input, int delay\+Samples, float decay)
+\begin{DoxyCompactList}\small\item\em Applies simple echo cancellation. \end{DoxyCompactList}\item 
+std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_a0c8498c268314270ab6a2ff7af2b30fc}{audio\+Encoding}} (const std\+::vector$<$ float $>$ \&input)
+\begin{DoxyCompactList}\small\item\em Applies simple audio encoding. \end{DoxyCompactList}\item 
+std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_a0382f22329f46503535ec401a92116c4}{audio\+Decoding}} (const std\+::vector$<$ float $>$ \&input)
+\begin{DoxyCompactList}\small\item\em Applies simple audio decoding. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Provides basic audio processing functions. 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioProcessing_a0382f22329f46503535ec401a92116c4}\label{classAudioProcessing_a0382f22329f46503535ec401a92116c4} 
+\index{AudioProcessing@{AudioProcessing}!audioDecoding@{audioDecoding}}
+\index{audioDecoding@{audioDecoding}!AudioProcessing@{AudioProcessing}}
+\doxysubsubsection{\texorpdfstring{audioDecoding()}{audioDecoding()}}
+{\footnotesize\ttfamily std\+::vector$<$ float $>$ Audio\+Processing\+::audio\+Decoding (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ float $>$ \&}]{input }\end{DoxyParamCaption})}
+
+
+
+Applies simple audio decoding. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & Input audio samples. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Decoded audio samples. 
+\end{DoxyReturn}
+\Hypertarget{classAudioProcessing_a0c8498c268314270ab6a2ff7af2b30fc}\label{classAudioProcessing_a0c8498c268314270ab6a2ff7af2b30fc} 
+\index{AudioProcessing@{AudioProcessing}!audioEncoding@{audioEncoding}}
+\index{audioEncoding@{audioEncoding}!AudioProcessing@{AudioProcessing}}
+\doxysubsubsection{\texorpdfstring{audioEncoding()}{audioEncoding()}}
+{\footnotesize\ttfamily std\+::vector$<$ float $>$ Audio\+Processing\+::audio\+Encoding (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ float $>$ \&}]{input }\end{DoxyParamCaption})}
+
+
+
+Applies simple audio encoding. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & Input audio samples. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Encoded audio samples. 
+\end{DoxyReturn}
+\Hypertarget{classAudioProcessing_ae53c78e330851ea0e21c9ab1ebb25122}\label{classAudioProcessing_ae53c78e330851ea0e21c9ab1ebb25122} 
+\index{AudioProcessing@{AudioProcessing}!echoCancellation@{echoCancellation}}
+\index{echoCancellation@{echoCancellation}!AudioProcessing@{AudioProcessing}}
+\doxysubsubsection{\texorpdfstring{echoCancellation()}{echoCancellation()}}
+{\footnotesize\ttfamily std\+::vector$<$ float $>$ Audio\+Processing\+::echo\+Cancellation (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ float $>$ \&}]{input,  }\item[{int}]{delay\+Samples,  }\item[{float}]{decay }\end{DoxyParamCaption})}
+
+
+
+Applies simple echo cancellation. 
+
+This subtracts a delayed and scaled version of the signal.
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & Input audio samples. \\
+\hline
+{\em delay\+Samples} & Echo delay in samples. \\
+\hline
+{\em decay} & Echo reduction factor. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Echo-\/reduced audio samples. 
+\end{DoxyReturn}
+\Hypertarget{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1}\label{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1} 
+\index{AudioProcessing@{AudioProcessing}!lowPass@{lowPass}}
+\index{lowPass@{lowPass}!AudioProcessing@{AudioProcessing}}
+\doxysubsubsection{\texorpdfstring{lowPass()}{lowPass()}}
+{\footnotesize\ttfamily std\+::vector$<$ float $>$ Audio\+Processing\+::low\+Pass (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ float $>$ \&}]{input,  }\item[{float}]{alpha }\end{DoxyParamCaption})}
+
+
+
+Applies a simple first-\/order low-\/pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & Input audio samples. \\
+\hline
+{\em alpha} & Filter smoothing factor between 0.\+0 and 1.\+0. Lower values create stronger smoothing. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Filtered audio samples. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Audio\+Processing.\+hpp\end{DoxyCompactItemize}

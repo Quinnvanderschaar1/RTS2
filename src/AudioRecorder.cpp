@@ -35,24 +35,42 @@ AudioRecorder::AudioRecorder(AudioFifo& fifo) : fifo(fifo) {}
 
 AudioRecorder::AudioRecorder(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
 
-int AudioRecorder::processInput(const float* inputBuffer, unsigned long framesPerBuffer) {
+int AudioRecorder::processInput(
+    const float* inputBuffer,
+    unsigned long framesPerBuffer
+) {
+    const unsigned long PROCESS_FRAMES =
+        static_cast<unsigned long>(gProcessFrames);
+
     auto sysNow = std::chrono::system_clock::now();
     auto steadyNow = std::chrono::steady_clock::now();
-    AudioBlock block;
-    block.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        sysNow.time_since_epoch()).count();
-    block.samples.assign(inputBuffer, inputBuffer + framesPerBuffer);
-    auto t1 = std::chrono::steady_clock::now();
-    uint64_t captureLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - steadyNow).count();
-    gTimingLogger.add("recorder_hw_capture", blockCount + 1, captureLatency);
 
-    auto tPush0 = std::chrono::steady_clock::now();
-    if (!fifo.tryPush(block, false)) {
-        return 0;
+    uint64_t captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        sysNow.time_since_epoch()
+    ).count();
+
+    unsigned long pushedBlocks = 0;
+
+    for (unsigned long offset = 0; offset < framesPerBuffer; offset += PROCESS_FRAMES) {
+        unsigned long n = std::min(PROCESS_FRAMES, framesPerBuffer - offset);
+
+        AudioBlock block;
+        block.captureNs = captureNs;
+        block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
+
+        if (!fifo.tryPush(block, false)) {
+            break;
+        }
+
+        ++pushedBlocks;
     }
-    auto tPush1 = std::chrono::steady_clock::now();
-    uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
-    gTimingLogger.add("recorder_hw_push", blockCount + 1, pushLatency);
+
+    auto t1 = std::chrono::steady_clock::now();
+    uint64_t captureLatency =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - steadyNow).count();
+
+    gTimingLogger.add("recorder_hw_capture", blockCount + 1, captureLatency);
+    gTimingLogger.add("recorder_hw_push", blockCount + 1, pushedBlocks);
 
     ++blockCount;
 

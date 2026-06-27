@@ -1,0 +1,61 @@
+\doxysection{Audio\+Player\+Simulator Class Reference}
+\hypertarget{classAudioPlayerSimulator}{}\label{classAudioPlayerSimulator}\index{AudioPlayerSimulator@{AudioPlayerSimulator}}
+
+
+Simulates an audio player.  
+
+
+
+
+{\ttfamily \#include $<$Simulated\+Audio.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAudioPlayerSimulator_a3fe5a85e8adb060cf13a65f214b621f7}{Audio\+Player\+Simulator}} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo, \mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}e2e\+Stats=nullptr)
+\begin{DoxyCompactList}\small\item\em Constructs a simulated audio player. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classAudioPlayerSimulator_a299746eef31a329100737ccdad7e2397}{start}} ()
+\begin{DoxyCompactList}\small\item\em Starts the simulated player. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Simulates an audio player. 
+
+Consumes audio blocks from a FIFO at the configured playback interval and performs simulated playback while collecting timing statistics. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classAudioPlayerSimulator_a3fe5a85e8adb060cf13a65f214b621f7}\label{classAudioPlayerSimulator_a3fe5a85e8adb060cf13a65f214b621f7} 
+\index{AudioPlayerSimulator@{AudioPlayerSimulator}!AudioPlayerSimulator@{AudioPlayerSimulator}}
+\index{AudioPlayerSimulator@{AudioPlayerSimulator}!AudioPlayerSimulator@{AudioPlayerSimulator}}
+\doxysubsubsection{\texorpdfstring{AudioPlayerSimulator()}{AudioPlayerSimulator()}}
+{\footnotesize\ttfamily Audio\+Player\+Simulator\+::\+Audio\+Player\+Simulator (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&}]{fifo,  }\item[{\mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}}]{e2e\+Stats = {\ttfamily nullptr} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs a simulated audio player. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fifo} & FIFO supplying audio blocks. \\
+\hline
+{\em e2e\+Stats} & Optional end-\/to-\/end latency statistics collector. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioPlayerSimulator_a299746eef31a329100737ccdad7e2397}\label{classAudioPlayerSimulator_a299746eef31a329100737ccdad7e2397} 
+\index{AudioPlayerSimulator@{AudioPlayerSimulator}!start@{start}}
+\index{start@{start}!AudioPlayerSimulator@{AudioPlayerSimulator}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void Audio\+Player\+Simulator\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Starts the simulated player. 
+
+Continuously consumes audio blocks from the FIFO and simulates playback. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Simulated\+Audio.\+hpp\end{DoxyCompactItemize}

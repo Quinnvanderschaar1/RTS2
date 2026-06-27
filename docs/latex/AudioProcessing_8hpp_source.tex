@@ -1,0 +1,31 @@
+\doxysection{Audio\+Processing.\+hpp}
+\hypertarget{AudioProcessing_8hpp_source}{}\label{AudioProcessing_8hpp_source}\index{include/AudioProcessing.hpp@{include/AudioProcessing.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioProcessing}{AudioProcessing}}\ \{}
+\DoxyCodeLine{00010\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00019\ \ \ \ \ std::vector<float>\ \mbox{\hyperlink{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1}{lowPass}}(}
+\DoxyCodeLine{00020\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<float>\&\ input,}
+\DoxyCodeLine{00021\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ alpha}
+\DoxyCodeLine{00022\ \ \ \ \ );}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00034\ \ \ \ \ std::vector<float>\ \mbox{\hyperlink{classAudioProcessing_ae53c78e330851ea0e21c9ab1ebb25122}{echoCancellation}}(}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<float>\&\ input,}
+\DoxyCodeLine{00036\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ delaySamples,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ decay}
+\DoxyCodeLine{00038\ \ \ \ \ );}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00046\ \ \ \ \ std::vector<float>\ \mbox{\hyperlink{classAudioProcessing_a0c8498c268314270ab6a2ff7af2b30fc}{audioEncoding}}(}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<float>\&\ input}
+\DoxyCodeLine{00048\ \ \ \ \ );}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00056\ \ \ \ \ std::vector<float>\ \mbox{\hyperlink{classAudioProcessing_a0382f22329f46503535ec401a92116c4}{audioDecoding}}(}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ std::vector<float>\&\ input}
+\DoxyCodeLine{00058\ \ \ \ \ );}
+\DoxyCodeLine{00059\ \};}
+
+\end{DoxyCode}

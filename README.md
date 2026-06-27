@@ -60,8 +60,7 @@ perf sched record -- ./conferencing 0.0.0.0 --div 200 --fifo 8
 hotspot perf.data
 ```
 
-
-sudo trace-cmd record -e sched_switch -e sched_wakeup --   sudo -E -u "$USER" env   XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR"   PULSE_SERVER="$PULSE_SERVER"   DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS"   ./conferencing 0.0.0.0 --div 200 --fifo 10
+sudo trace-cmd record -e sched_switch -e sched_wakeup --   sudo -E -u "$USER" env   XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR"   PULSE_SERVER="$PULSE_SERVER"   DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS"   ./conferencing 0.0.0.0 --ms 10 --split 20 --fifo 2000
 
 kernelshark trace.dat
 
@@ -212,6 +211,7 @@ mkdir build
 cd build
 cmake -DUSE_SIMULATION=ON ..
 make
+cpack -G DEB
 ```
 
 Run:
