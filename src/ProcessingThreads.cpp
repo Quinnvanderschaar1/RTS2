@@ -1,5 +1,6 @@
 #include "ProcessingThreads.hpp"
 #include "TimingLogger.hpp"
+#include "audioProcessing.hpp"
 
 #include <chrono>
 
@@ -123,6 +124,23 @@ void audioDecoderThreadLoop(
         gTimingLogger.add("audiordecoder_push", DecoderCount + 1, pushLatency);
 
         ++DecoderCount;
+    }
+}
+
+void HeavyLoopThreadLoop(
+    int loop_size
+) {
+    uint64_t HeavyLoopCount = 0;
+
+    while (true) {
+       
+        auto tProc0 = std::chrono::steady_clock::now();
+        AudioProcessing::HeavyLoop(loop_size);
+        auto tProc1 = std::chrono::steady_clock::now();
+        uint64_t procLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count();
+        gTimingLogger.add("heavyloop_proc", HeavyLoopCount + 1, procLatency);
+
+        ++HeavyLoopCount;
     }
 }
 

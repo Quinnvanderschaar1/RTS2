@@ -49,3 +49,6 @@ void audioDecoderThreadLoop(
     AudioFifo& destination,
     AudioProcessing& processing
 );
+
+void HeavyLoopThreadLoop( int loop_size
+);

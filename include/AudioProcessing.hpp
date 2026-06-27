@@ -56,4 +56,12 @@ public:
     std::vector<float> audioDecoding(
         const std::vector<float>& input
     );
+
+     /**
+     * @brief Applies simple heavy loop processing.
+     *
+     * @param input Input audio samples.
+     */
+    static void HeavyLoop(int loop_size
+    );
 };

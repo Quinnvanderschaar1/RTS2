@@ -80,6 +80,8 @@ int main(int argc, char* argv[]) {
             frameDivisor = std::atoi(argv[++i]);
         } else if (arg == "--fifo" && i + 1 < argc) {
             FIFO_SIZE = std::atoi(argv[++i]);
+        }else if (arg == "--loop" && i + 1 < argc) {
+            loop_size = std::atoi(argv[++i]);
         } else if (!hasPrefix(arg, "--")) {
             udpGroup = arg;
             userSpecifiedUdp = true;
@@ -245,6 +247,7 @@ int main(int argc, char* argv[]) {
     std::thread audioEncoderThread;
     std::thread audioDecoderThread;
     std::thread transmitThread;
+    std::thread HeavyLoopThread;
 
     if (useProcessing) {
         lowPassThread = std::thread([&] {
@@ -297,6 +300,14 @@ int main(int argc, char* argv[]) {
                 simulationMode
             );
         });
+
+        HeavyLoopThread = std::thread([&] {
+            setThreadName("HeavyLoop");
+            HeavyLoopThreadLoop( loop_size
+            );
+        });
+
+        
     } else {
         transmitThread = std::thread([&] {
             setThreadName("transmit");
@@ -352,6 +363,7 @@ int main(int argc, char* argv[]) {
     }
 
     transmitThread.join();
+    HeavyLoopThread.join();
 
     if (receiveThread.joinable()) {
         receiveThread.join();
