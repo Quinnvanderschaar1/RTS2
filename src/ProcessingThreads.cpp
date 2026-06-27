@@ -1,6 +1,6 @@
 #include "ProcessingThreads.hpp"
 #include "TimingLogger.hpp"
-#include "audioProcessing.hpp"
+#include "AudioProcessing.hpp"
 
 #include <chrono>
 
