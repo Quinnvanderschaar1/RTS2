@@ -39,7 +39,8 @@ int AudioRecorder::processInput(
     const float* inputBuffer,
     unsigned long framesPerBuffer
 ) {
-    constexpr unsigned long PROCESS_FRAMES = 48; // 1 ms at 48 kHz
+    const unsigned long PROCESS_FRAMES =
+        static_cast<unsigned long>(gProcessFrames);
 
     auto sysNow = std::chrono::system_clock::now();
     auto steadyNow = std::chrono::steady_clock::now();

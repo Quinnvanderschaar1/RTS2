@@ -27,7 +27,7 @@ void transmitLoop(
 
         bool gotAny = false;
 
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < gBlocksPerPacket; ++i) {
             AudioBlock smallBlock = micFifo.pop();
 
             if (!gotAny) {
@@ -95,7 +95,7 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
     WCETStats recvStats;
     WCETStats pushStats;
 
-    constexpr int PROCESS_FRAMES = 48; // 1 ms at 48 kHz
+    const int PROCESS_FRAMES = gProcessFrames;
 
     while (true) {
         auto t0 = std::chrono::steady_clock::now();

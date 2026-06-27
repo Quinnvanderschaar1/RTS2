@@ -36,7 +36,8 @@ AudioPlayer::AudioPlayer(AudioFifo& fifo) : fifo(fifo) {}
 AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
 
 int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) {
-    constexpr unsigned long PROCESS_FRAMES = 48; // 1 ms at 48 kHz
+    const unsigned long PROCESS_FRAMES =
+        static_cast<unsigned long>(gProcessFrames);
 
     unsigned long written = 0;
 
