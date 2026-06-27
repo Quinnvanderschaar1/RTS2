@@ -98,7 +98,7 @@ void AudioPlayer::start() {
         CHANNELS,
         paFloat32,
         SAMPLE_RATE,
-        gFramesPerBuffer,
+        gProcessFrames,
         &AudioPlayer::playCallback,
         this
     );
