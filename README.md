@@ -211,6 +211,7 @@ mkdir build
 cd build
 cmake -DUSE_SIMULATION=ON ..
 make
+cpack -G DEB
 ```
 
 Run:

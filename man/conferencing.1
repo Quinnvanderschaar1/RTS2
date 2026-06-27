@@ -1,0 +1,201 @@
+.TH CONFERENCING 1 "June 2026" "RTS2" "User Commands"
+
+.SH NAME
+conferencing \- real-time audio conferencing application
+
+.SH SYNOPSIS
+.B conferencing
+[\fIaddress\fR]
+[\fB--hw\fR]
+[\fB--sim\fR]
+[\fB--no-udp\fR]
+[\fB--np\fR]
+[\fB--ms\fR \fImilliseconds\fR]
+[\fB--split\fR \fIcount\fR]
+[\fB--fifo\fR \fIsize\fR]
+
+.SH DESCRIPTION
+.B conferencing
+is a real-time audio conferencing application that records audio,
+processes it through a configurable processing pipeline, optionally
+transmits it over UDP, and plays the received audio.
+
+The processing pipeline consists of:
+
+.RS
+Recorder →
+Low-pass filter →
+Echo cancellation →
+μ-law encoder →
+UDP transmit →
+UDP receive →
+μ-law decoder →
+Playback
+.RE
+
+Audio is captured in configurable hardware blocks and internally split
+into smaller processing blocks for fine-grained scheduling.
+
+.SH OPTIONS
+
+.TP
+.BI address
+Destination IPv4 address used for UDP transmission.
+Examples:
+127.0.0.1,
+192.168.1.100.
+
+.TP
+.B --hw
+Run using physical audio hardware (default).
+
+.TP
+.B --sim
+Run using simulated audio input/output.
+
+.TP
+.B --no-udp
+Disable UDP networking.
+Audio is looped back locally.
+
+.TP
+.B --np
+Disable audio processing.
+Recorder connects directly to transmitter/playback.
+
+.TP
+.BI --ms " milliseconds"
+Size of the audio hardware callback in milliseconds.
+
+For example:
+
+.RS
+5 ms  = 240 samples
+
+10 ms = 480 samples
+
+20 ms = 960 samples
+.RE
+
+.TP
+.BI --split " count"
+Number of internal processing blocks created from one hardware block.
+
+The processing block size is computed as
+
+.RS
+process_frames = frames_per_buffer / split
+.RE
+
+Example:
+
+.RS
+--ms 10 --split 10
+
+480-sample hardware block
+
+10 × 48-sample processing blocks
+.RE
+
+.TP
+.BI --fifo " size"
+Maximum number of audio blocks stored in each FIFO.
+
+.SH EXAMPLES
+
+Run locally using loopback networking:
+
+.nf
+conferencing 127.0.0.1 --ms 10 --split 10 --fifo 20
+.fi
+
+Run using hardware with a remote receiver:
+
+.nf
+conferencing 192.168.50.189 --ms 10 --split 10 --fifo 20
+.fi
+
+Run in simulation mode:
+
+.nf
+conferencing --sim --ms 20 --split 5
+.fi
+
+Disable processing:
+
+.nf
+conferencing --np --no-udp
+.fi
+
+.SH AUDIO PIPELINE
+
+For
+
+.nf
+--ms 10 --split 10
+.fi
+
+the application operates as
+
+.nf
+Recorder       480 samples
+      ↓
+10 × 48-sample FIFO blocks
+      ↓
+Low-pass
+      ↓
+Echo cancellation
+      ↓
+μ-law encoding
+      ↓
+Transmit
+      ↓
+UDP packet (480 samples)
+      ↓
+Receive
+      ↓
+10 × 48-sample FIFO blocks
+      ↓
+μ-law decoding
+      ↓
+Playback (480 samples)
+.fi
+
+.SH FILES
+
+.TP
+.B timing_report.csv
+Execution timing statistics.
+
+.TP
+.B fifo_occupancy.csv
+FIFO occupancy over time.
+
+.TP
+.B queue_latency.csv
+FIFO queue latency measurements.
+
+.TP
+.B network_jitter.csv
+Network latency and jitter measurements.
+
+.SH EXIT STATUS
+
+.TP
+0
+Successful execution.
+
+.TP
+1
+Invalid command-line arguments or initialization failure.
+
+.SH AUTHORS
+
+Developed for the RTS2 real-time systems project.
+
+.SH SEE ALSO
+
+trace-cmd(1),
+sched(7),
+pthread_setschedparam(3),
+PortAudio
