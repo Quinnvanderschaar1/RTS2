@@ -1,6 +1,11 @@
 # RTS2
 Real time conferencing application
 
+# Documentation
+install:
+```
+sudo apt install doxygen graphviz
+```
 
 
 ## installs

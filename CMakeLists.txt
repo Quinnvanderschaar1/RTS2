@@ -30,6 +30,8 @@ set(SRC_FILES
     src/TimingLogger.cpp
     src/Transceiver.cpp
     src/Globals.cpp
+    src/ProgramOptions.cpp
+    src/Application.cpp
 )
 
 if(NOT USE_SIMULATION OR PORTAUDIO_FOUND)
