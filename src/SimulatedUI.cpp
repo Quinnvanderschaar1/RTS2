@@ -7,6 +7,16 @@
 #include <stdio.h>
 #include <iostream>
 
+namespace {
+void saveAndExit() {
+    gTimingLogger.saveCSV("timing_report.csv");
+    gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
+    gTimingLogger.saveQueueCSV("queue_latency.csv");
+    gTimingLogger.saveNetworkCSV("network_jitter.csv");
+    std::exit(0);
+}
+}
+
 static bool isKeyboardPressedOnce() {
     termios oldt{};
     termios newt{};
@@ -25,12 +35,8 @@ static bool isKeyboardPressedOnce() {
     fcntl(STDIN_FILENO, F_SETFL, oldFlags);
 
     if (ch == 'x' || ch == 'X') {
-           std::cout << "Saving CSV files and exiting..." << std::endl;
-           gTimingLogger.saveCSV("timing_report.csv");
-           gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
-           gTimingLogger.saveQueueCSV("queue_latency.csv");
-           gTimingLogger.saveNetworkCSV("network_jitter.csv");
-           std::exit(0);
+        std::cout << "Saving CSV files and exiting..." << std::endl;
+        saveAndExit();
     }
 
     return ch == ' ';

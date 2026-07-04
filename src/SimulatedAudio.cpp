@@ -1,13 +1,13 @@
 #include "SimulatedAudio.hpp"
 #include "TimingLogger.hpp"
-#include "AudioMixer.hpp"
-#include "AudioProcessing.hpp"
 #include <chrono>
 #include <cmath>
 #include <thread>
 #include <iostream>
 
 #include "Globals.hpp"
+
+#include <algorithm>
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr double TWO_PI = 6.28318530717958647692;
@@ -16,7 +16,8 @@ constexpr double SIM_TONE_FREQUENCY = 440.0;
 AudioRecorderSimulator::AudioRecorderSimulator(AudioFifo& f, WCETStats* e2e) : fifo(f), e2eStats(e2e) {}
 
 void AudioRecorderSimulator::start() {
-    const auto blockDuration = std::chrono::microseconds(1000000LL * gFramesPerBuffer / SAMPLE_RATE);
+    const auto fullBufferDuration = std::chrono::microseconds(1000000LL * gFramesPerBuffer / SAMPLE_RATE);
+    const auto processBlockFrames = std::max(1, gProcessFrames);
     auto nextWake = std::chrono::steady_clock::now();
     std::vector<float> buffer(gFramesPerBuffer);
 
@@ -33,22 +34,26 @@ void AudioRecorderSimulator::start() {
         gTimingLogger.add("recorder_sim_gen", blockCount.load() + 1, genLatency);
 
         auto sysPush0 = std::chrono::system_clock::now();
-        auto steadyPush0 = std::chrono::steady_clock::now();
-        AudioBlock out;
-        out.captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(sysPush0.time_since_epoch()).count();
-        out.samples = buffer;
-        fifo.push(out);
-        auto tPush1 = std::chrono::steady_clock::now();
-        uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - steadyPush0).count();
-        pushStats.update(pushLatency);
-        gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
+        const uint64_t captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(sysPush0.time_since_epoch()).count();
 
-        ++blockCount;
+        for (int offset = 0; offset < gFramesPerBuffer; offset += processBlockFrames) {
+            const int n = std::min(processBlockFrames, gFramesPerBuffer - offset);
+            auto steadyPush0 = std::chrono::steady_clock::now();
+            AudioBlock out;
+            out.captureNs = captureNs;
+            out.samples.assign(buffer.begin() + offset, buffer.begin() + offset + n);
+            fifo.push(out);
+            auto tPush1 = std::chrono::steady_clock::now();
+            uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - steadyPush0).count();
+            pushStats.update(pushLatency);
+            gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
+            ++blockCount;
+        }
 
-        nextWake += blockDuration;
+        nextWake += fullBufferDuration;
         auto now = std::chrono::steady_clock::now();
         if (nextWake <= now) {
-            nextWake = now + blockDuration;
+            nextWake = now + fullBufferDuration;
         } else {
             std::this_thread::sleep_until(nextWake);
         }
@@ -58,30 +63,32 @@ void AudioRecorderSimulator::start() {
 AudioPlayerSimulator::AudioPlayerSimulator(AudioFifo& f, WCETStats* e2e) : fifo(f), e2eStats(e2e) {}
 
 void AudioPlayerSimulator::start() {
-    const auto blockDuration = std::chrono::microseconds(1000000LL * gFramesPerBuffer / SAMPLE_RATE);
-    AudioMixer mixer;
-    AudioProcessing processor;
+    const auto blockDuration = std::chrono::microseconds(1000000LL * std::max(1, gFramesPerBuffer) / SAMPLE_RATE);
     auto nextPlayback = std::chrono::steady_clock::now();
 
     while (true) {
+        const unsigned long framesPerBuffer = static_cast<unsigned long>(std::max(1, gFramesPerBuffer));
+        std::vector<float> output(framesPerBuffer, 0.0f);
+        unsigned long written = 0;
+        uint64_t firstCaptureNs = 0;
+
         auto t0 = std::chrono::steady_clock::now();
-        AudioBlock block = fifo.pop();
+        while (written < framesPerBuffer) {
+            AudioBlock block = fifo.pop();
+            if (firstCaptureNs == 0 && block.captureNs != 0) {
+                firstCaptureNs = block.captureNs;
+            }
+
+            const unsigned long n = std::min<unsigned long>(block.samples.size(), framesPerBuffer - written);
+            if (n > 0) {
+                std::copy(block.samples.begin(), block.samples.begin() + n, output.begin() + written);
+                written += n;
+            }
+        }
         auto t1 = std::chrono::steady_clock::now();
         uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
         popStats.update(popLatency);
         gTimingLogger.add("player_sim_pop", blockCount.load() + 1, popLatency);
-
-        auto tMix0 = std::chrono::steady_clock::now();
-        std::vector<float> mixed = mixer.mix({block.samples});
-        auto tMix1 = std::chrono::steady_clock::now();
-        gTimingLogger.add("player_sim_mix", blockCount.load() + 1,
-            std::chrono::duration_cast<std::chrono::nanoseconds>(tMix1 - tMix0).count());
-
-        auto tProc0 = std::chrono::steady_clock::now();
-        std::vector<float> output = processor.lowPass(mixed, 0.5f);
-        auto tProc1 = std::chrono::steady_clock::now();
-        gTimingLogger.add("player_sim_proc", blockCount.load() + 1,
-            std::chrono::duration_cast<std::chrono::nanoseconds>(tProc1 - tProc0).count());
 
         // keep playback timing independent, but do not hold an extra full cycle if behind
         nextPlayback += blockDuration;
@@ -95,10 +102,10 @@ void AudioPlayerSimulator::start() {
         // playback instant
         auto playbackTime = std::chrono::system_clock::now();
 
-         // end-to-end measurement: now - capture timestamp
-        if (e2eStats && block.captureNs != 0) {
+        // end-to-end measurement: now - capture timestamp
+        if (e2eStats && firstCaptureNs != 0) {
             uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(playbackTime.time_since_epoch()).count();
-            uint64_t latency = playbackNs - block.captureNs;
+            uint64_t latency = playbackNs - firstCaptureNs;
             e2eStats->update(latency);
             gTimingLogger.add("player_sim_end_to_end", blockCount.load() + 1, latency);
         }

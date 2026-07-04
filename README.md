@@ -1,6 +1,34 @@
 # RTS2
 Real time conferencing application
 
+## Pipeline walkthrough
+
+A detailed explanation of the audio path, packet formation, and the meaning of the global variables is available in [README_PIPELINE.md](README_PIPELINE.md).
+
+The short version is:
+
+```text
+microphone / simulator
+    -> recorder
+    -> low-pass filter
+    -> echo cancellation
+    -> audio encoding
+    -> packet builder / UDP transmit
+    -> receiver
+    -> audio decoding
+    -> playback
+```
+
+The system does not move one sample at a time. It works in blocks:
+
+- one full audio buffer is split into smaller processing blocks
+- each processing block is handled by the pipeline stages
+- several small blocks are grouped into one outgoing packet
+- the receiver splits that packet back into small blocks for decoding and playback
+
+### Example
+If the audio buffer is 480 frames and the split divisor is 10, then each processing block contains 48 frames. Ten of those blocks are grouped into one packet, so the packet carries 480 frames in total.
+
 # Documentation
 install:
 ```
