@@ -41,6 +41,25 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
     unsigned long written = 0;
     uint64_t firstCaptureNs = 0;
     uint64_t popCount = 0;
+    static bool started = false;
+    static size_t bufferedSamples = 0;
+    const size_t START_THRESHOLD = 3 * gFramesPerBuffer; // e.g. 30ms buffer
+
+     if (!started) {
+        AudioBlock block;
+
+        while (bufferedSamples < START_THRESHOLD) {
+            if (!fifo.tryPop(block, false)) {
+                // still warming up → output silence but DO NOT start
+                std::memset(outputBuffer, 0, framesPerBuffer * sizeof(float));
+                return 0;
+            }
+
+            bufferedSamples += block.samples.size();
+        }
+
+        started = true;
+    }
 
     while (written < framesPerBuffer) {
         auto popStart = std::chrono::steady_clock::now();
