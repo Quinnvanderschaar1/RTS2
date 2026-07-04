@@ -1,5 +1,6 @@
 ﻿#include "AudioPlayer.hpp"
 #include "TimingLogger.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cstring>
 #include <iostream>
@@ -36,13 +37,13 @@ AudioPlayer::AudioPlayer(AudioFifo& fifo) : fifo(fifo) {}
 AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
 
 int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) {
-    const unsigned long PROCESS_FRAMES =
-        static_cast<unsigned long>(gProcessFrames);
-
+    auto outputStart = std::chrono::steady_clock::now();
     unsigned long written = 0;
+    uint64_t firstCaptureNs = 0;
+    uint64_t popCount = 0;
 
     while (written < framesPerBuffer) {
-        
+        auto popStart = std::chrono::steady_clock::now();
         AudioBlock block;
 
         if (!fifo.tryPop(block, false)) {
@@ -51,7 +52,19 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
                 0,
                 (framesPerBuffer - written) * sizeof(float)
             );
+            auto outputEnd = std::chrono::steady_clock::now();
+            gTimingLogger.add("player_hw_silent_frames", blockCount + 1,
+                std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - outputStart).count());
+            ++blockCount;
             return 0;
+        }
+
+        auto popEnd = std::chrono::steady_clock::now();
+        gTimingLogger.add("player_hw_pop", blockCount + 1,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(popEnd - popStart).count());
+
+        if (firstCaptureNs == 0 && block.captureNs != 0) {
+            firstCaptureNs = block.captureNs;
         }
 
         unsigned long n = std::min<unsigned long>(
@@ -66,6 +79,19 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
         );
 
         written += n;
+        ++popCount;
+    }
+
+    auto outputEnd = std::chrono::steady_clock::now();
+    gTimingLogger.add("player_hw_reconstruct", blockCount + 1,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - outputStart).count());
+
+    if (e2eStats && firstCaptureNs != 0) {
+        auto playbackTime = std::chrono::system_clock::now();
+        uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(playbackTime.time_since_epoch()).count();
+        uint64_t latency = playbackNs - firstCaptureNs;
+        e2eStats->update(latency);
+        gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
     }
 
     ++blockCount;

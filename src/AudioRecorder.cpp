@@ -58,6 +58,8 @@ int AudioRecorder::processInput(
         block.captureNs = captureNs;
         block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
 
+        // Push each smaller processing block immediately so the downstream pipeline
+        // can consume it without waiting for the whole callback buffer to be assembled.
         if (!fifo.tryPush(block, false)) {
             break;
         }
