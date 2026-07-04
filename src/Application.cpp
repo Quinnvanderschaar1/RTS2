@@ -251,7 +251,7 @@ int Application::run()
     std::thread audioEncoderThread;
     std::thread audioDecoderThread;
     std::thread transmitThread;
-    std::thread heavyLoopThread;
+   // std::thread heavyLoopThread;
 
     if (options.useProcessing) {
         lowPassThread = std::thread([&] {
@@ -305,10 +305,10 @@ int Application::run()
             );
         });
 
-        heavyLoopThread = std::thread([&] {
-            setThreadName("HeavyLoop");
-            HeavyLoopThreadLoop(loop_size);
-        });
+      //  heavyLoopThread = std::thread([&] {
+      //      setThreadName("HeavyLoop");
+      //      HeavyLoopThreadLoop(loop_size);
+      //  });
     } else {
         transmitThread = std::thread([&] {
             setThreadName("transmit");
@@ -362,9 +362,9 @@ int Application::run()
         transmitThread.join();
     }
 
-    if (heavyLoopThread.joinable()) {
-        heavyLoopThread.join();
-    }
+   // if (heavyLoopThread.joinable()) {
+   //     heavyLoopThread.join();
+   // }
 
     if (receiveThread.joinable()) {
         receiveThread.join();
