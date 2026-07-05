@@ -126,12 +126,12 @@ int Application::run()
     registerExitHandlers();
     printStartupInfo(echoDelaySamples);
 
-    AudioFifo micFifo(FIFO_SIZE);
-    AudioFifo lowPassFifo(FIFO_SIZE);
-    AudioFifo echoCancelFifo(FIFO_SIZE);
-    AudioFifo audioEncoderFifo(FIFO_SIZE);
-    AudioFifo audioDecoderFifo(FIFO_SIZE);
-    AudioFifo playbackFifo(FIFO_SIZE);
+    AudioFifo micFifo(FIFO_SIZE, "mic");
+    AudioFifo lowPassFifo(FIFO_SIZE, "lowpass");
+    AudioFifo echoCancelFifo(FIFO_SIZE, "echo_cancel");
+    AudioFifo audioEncoderFifo(FIFO_SIZE, "encoder");
+    AudioFifo audioDecoderFifo(FIFO_SIZE, "decoder");
+    AudioFifo playbackFifo(FIFO_SIZE, "playback");
 
     AudioProcessing audioProcessing;
 

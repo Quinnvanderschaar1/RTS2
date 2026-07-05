@@ -43,9 +43,9 @@ void TimingLogger::saveCSV(const std::string& filename) {
 void TimingLogger::saveFifoCSV(const std::string& filename) {
     std::lock_guard<std::mutex> lock(mutex);
     std::ofstream file(filename);
-    file << "timestamp_ns,event,current_size,max_size,avg_size\n";
+    file << "timestamp_ns,fifo_name,event,current_size,max_size,avg_size\n";
     for (const auto& s : fifoSamples) {
-        file << s.tsNs << "," << s.event << "," << s.currentSize << "," << s.maxSize << "," << s.avgSize << "\n";
+        file << s.tsNs << "," << s.fifoName << "," << s.event << "," << s.currentSize << "," << s.maxSize << "," << s.avgSize << "\n";
     }
 }
 

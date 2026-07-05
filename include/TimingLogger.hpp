@@ -13,6 +13,7 @@ struct TimingSample {
 
 struct FifoSample {
     uint64_t tsNs;
+    std::string fifoName;
     std::string event; // "push" or "pop"
     size_t currentSize;
     size_t maxSize;

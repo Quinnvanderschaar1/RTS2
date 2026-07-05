@@ -3,6 +3,7 @@
 #include <queue>
 #include <vector>
 #include <cstdint>
+#include <string>
 #include <pthread.h>
 #include "Globals.hpp"
 
@@ -23,6 +24,11 @@ struct AudioBlock {
 
 class AudioFifo {
 private:
+    /**
+     * @brief Name used when logging FIFO activity.
+     */
+    std::string fifoName;
+
     /**
      * @brief Queue containing audio blocks.
      */
@@ -53,7 +59,7 @@ public:
      * @brief Constructs an empty audio FIFO.
      * @param capacity Maximum number of blocks to buffer.
      */
-    AudioFifo(size_t capacity = FIFO_SIZE);
+    AudioFifo(size_t capacity = FIFO_SIZE, const std::string& name = "fifo");
 
     /**
      * @brief Destroys the audio FIFO and releases synchronization resources.
