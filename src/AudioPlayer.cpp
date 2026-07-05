@@ -13,7 +13,6 @@
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
 
-
 static void enableRealtimeThread(int cpu = 1, int priority = 70) {
 #if defined(__linux__)
     cpu_set_t cpus;
@@ -37,49 +36,27 @@ AudioPlayer::AudioPlayer(AudioFifo& fifo) : fifo(fifo) {}
 AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
 
 int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) {
-    auto outputStart = std::chrono::steady_clock::now();
     unsigned long written = 0;
     uint64_t firstCaptureNs = 0;
-    uint64_t popCount = 0;
-    static bool started = false;
-    static size_t bufferedSamples = 0;
-    const size_t START_THRESHOLD = 3 * gFramesPerBuffer; // e.g. 30ms buffer
 
-     if (!started) {
-        AudioBlock block;
+    auto procStart = std::chrono::steady_clock::now();
 
-        while (bufferedSamples < START_THRESHOLD) {
-            if (!fifo.tryPop(block, false)) {
-                // still warming up → output silence but DO NOT start
-                std::memset(outputBuffer, 0, framesPerBuffer * sizeof(float));
-                return 0;
-            }
-
-            bufferedSamples += block.samples.size();
-        }
-
-        started = true;
-    }
-    auto proc_Start = std::chrono::steady_clock::now();
+    // Combine incoming small blocks, e.g. 10 x 2 ms blocks,
+    // into one full PortAudio output buffer, e.g. 20 ms.
     while (written < framesPerBuffer) {
         auto popStart = std::chrono::steady_clock::now();
-        AudioBlock block;
-        bool popped = fifo.tryPop(block, false);
-        auto popEnd = std::chrono::steady_clock::now();
-        
-        if (!popped) {
-            auto popEnd = std::chrono::steady_clock::now();
-            std::memset(
-                outputBuffer + written,
-                0,
-                (framesPerBuffer - written) * sizeof(float)
-            );
-            return 0;
-        }
 
-        
-        gTimingLogger.add("player_hw_pop", blockCount + 1,
-            std::chrono::duration_cast<std::chrono::nanoseconds>(popEnd - popStart).count());
+        // Blocking pop: wait until the next small block is available.
+        // This avoids inserting silence when the FIFO is momentarily empty.
+        AudioBlock block = fifo.pop();
+
+        auto popEnd = std::chrono::steady_clock::now();
+
+        gTimingLogger.add(
+            "player_hw_pop",
+            blockCount + 1,
+            std::chrono::duration_cast<std::chrono::nanoseconds>(popEnd - popStart).count()
+        );
 
         if (firstCaptureNs == 0 && block.captureNs != 0) {
             firstCaptureNs = block.captureNs;
@@ -90,22 +67,28 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
             framesPerBuffer - written
         );
 
-        std::memcpy(
-            outputBuffer + written,
-            block.samples.data(),
-            n * sizeof(float)
-        );
-
-        written += n;
-        ++popCount;
+        if (n > 0) {
+            std::memcpy(
+                outputBuffer + written,
+                block.samples.data(),
+                n * sizeof(float)
+            );
+            written += n;
+        }
     }
+
     auto outputEnd = std::chrono::steady_clock::now();
-    gTimingLogger.add("player_hw_proc", blockCount + 1,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - proc_Start).count());
+    gTimingLogger.add(
+        "player_hw_proc",
+        blockCount + 1,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - procStart).count()
+    );
 
     if (e2eStats && firstCaptureNs != 0) {
         auto playbackTime = std::chrono::system_clock::now();
-        uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(playbackTime.time_since_epoch()).count();
+        uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            playbackTime.time_since_epoch()
+        ).count();
         uint64_t latency = playbackNs - firstCaptureNs;
         e2eStats->update(latency);
         gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
