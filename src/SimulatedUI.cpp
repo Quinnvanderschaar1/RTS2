@@ -13,6 +13,7 @@ void saveAndExit() {
     gTimingLogger.saveFifoCSV("fifo_occupancy.csv");
     gTimingLogger.saveQueueCSV("queue_latency.csv");
     gTimingLogger.saveNetworkCSV("network_jitter.csv");
+    gTimingLogger.saveDropCSV("dropped_frames.csv");
     std::exit(0);
 }
 }

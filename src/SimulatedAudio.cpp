@@ -44,6 +44,9 @@ void AudioRecorderSimulator::start() {
             out.captureNs = captureNs;
             out.samples.assign(buffer.begin() + offset, buffer.begin() + offset + n);
             bool pushed = fifo.tryPush(out, false);
+            if (!pushed) {
+                gTimingLogger.addDropSample({captureNs, "mic", "recorder_sim"});
+            }
             auto tPush1 = std::chrono::steady_clock::now();
             uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - steadyPush0).count();
             if (pushed) {

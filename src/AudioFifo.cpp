@@ -85,6 +85,7 @@ bool AudioFifo::tryPush(AudioBlock block, bool log) {
 
     if (queue.size() >= capacity) {
         pthread_mutex_unlock(&mutex);
+        gTimingLogger.addDropSample({nowNs, fifoName, "unknown", "fifo_full"});
         return false;
     }
 
