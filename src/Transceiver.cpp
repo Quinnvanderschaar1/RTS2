@@ -28,6 +28,7 @@ void transmitLoop(
 
         bool gotAny = false;
         uint64_t totalPopLatency = 0;
+        uint64_t totalBlockAssemblyLatency = 0;
 
         for (int i = 0; i < gBlocksPerPacket; ++i) {
             auto popStart = std::chrono::steady_clock::now();
@@ -54,7 +55,7 @@ void transmitLoop(
                     << popLatency / 1000000.0
                     << std::endl;
             }
-
+            auto BlockAssemblyStart = std::chrono::steady_clock::now();
             if (!gotAny) {
                 packetBlock.captureNs = smallBlock.captureNs;
                 packetBlock.sendNs = smallBlock.sendNs;
@@ -66,9 +67,16 @@ void transmitLoop(
                 smallBlock.samples.begin(),
                 smallBlock.samples.end()
             );
+            auto BlockAssemblyEnd = std::chrono::steady_clock::now();
+            uint64_t blockAssemblyLatency =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    BlockAssemblyEnd - BlockAssemblyStart
+                ).count();
+            totalBlockAssemblyLatency += blockAssemblyLatency;
         }
 
         gTimingLogger.add("transmit_pop_total", stats.count + 1, totalPopLatency);
+        gTimingLogger.add("transmit_block_assembly_total", stats.count + 1, totalBlockAssemblyLatency);
 
         auto activeStart = std::chrono::steady_clock::now();
 
@@ -134,6 +142,7 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
     const int PROCESS_FRAMES = gProcessFrames;
 
     while (true) {
+        uint64_t totalBlockDisassemblyLatency = 0;
         auto recvStart = std::chrono::steady_clock::now();
 
         AudioBlock remoteBlock = receiver.receiveBlock(gFramesPerBuffer);
@@ -150,13 +159,14 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
         }
 
         recvStats.update(recvLatency);
-        gTimingLogger.add("receive_recv", receivedCount + 1, recvLatency);
+        gTimingLogger.add("receive_recv_delay", receivedCount + 1, recvLatency);
 
         auto splitPushStart = std::chrono::steady_clock::now();
 
         size_t pushedBlocks = 0;
 
         for (size_t offset = 0; offset < remoteBlock.samples.size(); offset += PROCESS_FRAMES) {
+            auto splitStart = std::chrono::steady_clock::now();
             size_t n = std::min<size_t>(
                 PROCESS_FRAMES,
                 remoteBlock.samples.size() - offset
@@ -170,6 +180,14 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
                 remoteBlock.samples.begin() + offset,
                 remoteBlock.samples.begin() + offset + n
             );
+            auto splitEnd = std::chrono::steady_clock::now();
+
+            uint64_t splitLatency =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    splitEnd - splitStart
+                ).count();
+
+            totalBlockDisassemblyLatency += splitLatency;
 
             auto pushStart = std::chrono::steady_clock::now();
 
@@ -195,9 +213,8 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
                 splitPushEnd - splitPushStart
             ).count();
 
-        gTimingLogger.add("receive_split_push_total", receivedCount + 1, splitPushLatency);
-        gTimingLogger.add("receive_pushed_blocks", receivedCount + 1, pushedBlocks);
-
+        gTimingLogger.add("receive_block_disassembly_total", receivedCount + 1, totalBlockDisassemblyLatency);
+        gTimingLogger.add("receive_split_and_push_total", receivedCount + 1, splitPushLatency);
         ++receivedCount;
     }
 }

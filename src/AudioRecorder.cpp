@@ -50,7 +50,7 @@ int AudioRecorder::processInput(
 
     auto sysNow = std::chrono::system_clock::now();
     auto procStart = std::chrono::steady_clock::now();
-
+    uint64_t totalRecordLatency = 0;
     uint64_t captureNs =
         std::chrono::duration_cast<std::chrono::nanoseconds>(
             sysNow.time_since_epoch()
@@ -60,11 +60,12 @@ int AudioRecorder::processInput(
 
     for (unsigned long offset = 0; offset < framesPerBuffer; offset += PROCESS_FRAMES) {
         unsigned long n = std::min(PROCESS_FRAMES, framesPerBuffer - offset);
-
+        auto recStart = std::chrono::steady_clock::now();
         AudioBlock block;
         block.captureNs = captureNs;
         block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
-
+        auto recEnd = std::chrono::steady_clock::now();
+        totalRecordLatency += std::chrono::duration_cast<std::chrono::nanoseconds>(recEnd - recStart).count();
         auto pushStart = std::chrono::steady_clock::now();
 
         // Important: do not silently drop blocks.
@@ -78,7 +79,7 @@ int AudioRecorder::processInput(
             ).count();
 
         gTimingLogger.add("recorder_hw_push", pushedBlocks + 1, pushLatency);
-
+        gTimingLogger.add("recorder_hw_record", pushedBlocks + 1, totalRecordLatency);
         if (pushLatency > 30000000) {
             std::cout
                 << "[RECORDER] slow fifo.push block="
