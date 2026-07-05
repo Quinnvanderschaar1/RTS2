@@ -50,31 +50,50 @@ int AudioRecorder::processInput(
     ).count();
 
     unsigned long pushedBlocks = 0;
-    
+
     for (unsigned long offset = 0; offset < framesPerBuffer; offset += PROCESS_FRAMES) {
         unsigned long n = std::min(PROCESS_FRAMES, framesPerBuffer - offset);
-        auto proc_start = std::chrono::steady_clock::now();
+
         AudioBlock block;
         block.captureNs = captureNs;
         block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
-        // Push each smaller processing block immediately so the downstream pipeline
-        // can consume it without waiting for the whole callback buffer to be assembled.
+
         auto t_pushed_start = std::chrono::steady_clock::now();
-        bool pushed = fifo.tryPush(block, false);
+
+        // Important change:
+        // Use blocking push so recorder does not silently drop 2 ms blocks.
+        fifo.push(block);
+
         auto t_pushed_end = std::chrono::steady_clock::now();
-        if (!pushed) {
-            break;
-        }
+
         uint64_t pushLatency =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(t_pushed_end - t_pushed_start).count();
-            gTimingLogger.add("recorder_hw_push", pushedBlocks + 1, pushLatency);
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                t_pushed_end - t_pushed_start
+            ).count();
+
+        gTimingLogger.add("recorder_hw_push", pushedBlocks + 1, pushLatency);
+
+        if (pushLatency > 30000000) {
+            std::cout
+                << "[RECORDER] slow fifo.push block="
+                << pushedBlocks
+                << " pushMs="
+                << pushLatency / 1000000.0
+                << std::endl;
+        }
+
         ++pushedBlocks;
     }
+
     auto proc_end = std::chrono::steady_clock::now();
+
     uint64_t captureLatency =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(proc_end - proc_start).count();
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            proc_end - proc_start
+        ).count();
 
     gTimingLogger.add("recorder_hw_proc", blockCount + 1, captureLatency);
+
     ++blockCount;
 
     return 0;

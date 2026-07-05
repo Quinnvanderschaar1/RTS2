@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "Globals.hpp"
-
 void transmitLoop(
     AudioFifo& micFifo,
     AudioFifo& playbackFifo,
@@ -19,20 +18,28 @@ void transmitLoop(
         uint64_t count{0};
     } stats;
 
+    static uint64_t sendCount = 0;
+    static auto lastSend = std::chrono::steady_clock::now();
+
     while (true) {
         auto t_proc_start = std::chrono::steady_clock::now();
         auto t_proc_end = std::chrono::steady_clock::now();
         auto t_full_delay_start = std::chrono::steady_clock::now();
+
         AudioBlock packetBlock;
         packetBlock.samples.reserve(gFramesPerBuffer);
 
         bool gotAny = false;
+
         for (int i = 0; i < gBlocksPerPacket; ++i) {
             auto t0 = std::chrono::steady_clock::now();
+
             AudioBlock smallBlock = micFifo.pop();
+
             auto t1 = std::chrono::steady_clock::now();
             uint64_t popLatency =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+                std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+
             stats.pop.update(popLatency);
             gTimingLogger.add("transmit_block_pop", stats.count + 1, popLatency);
 
@@ -41,19 +48,25 @@ void transmitLoop(
                 packetBlock.sendNs = smallBlock.sendNs;
                 gotAny = true;
             }
+
             t_proc_start = std::chrono::steady_clock::now();
+
             packetBlock.samples.insert(
                 packetBlock.samples.end(),
                 smallBlock.samples.begin(),
                 smallBlock.samples.end()
             );
+
             t_proc_end = std::chrono::steady_clock::now();
-           
         }
+
         int mult = gBlocksPerPacket;
         uint64_t proc =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(t_proc_end - t_proc_start).count();
-        gTimingLogger.add("transmit_block_proc", stats.count + 1, proc*mult);
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                t_proc_end - t_proc_start
+            ).count();
+
+        gTimingLogger.add("transmit_block_proc", stats.count + 1, proc * mult);
 
         bool active = isActive();
         setLed(active);
@@ -66,9 +79,29 @@ void transmitLoop(
 
                 auto tSend1 = std::chrono::steady_clock::now();
                 uint64_t sendLatency =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(tSend1 - tSend0).count();
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        tSend1 - tSend0
+                    ).count();
 
                 gTimingLogger.add("transmit_send", stats.count + 1, sendLatency);
+
+                auto nowSend = std::chrono::steady_clock::now();
+                double sendGapMs =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        nowSend - lastSend
+                    ).count() / 1000000.0;
+
+                lastSend = nowSend;
+                ++sendCount;
+
+                if ((sendCount % 50) == 0) {
+                    std::cout
+                        << "[SEND] count=" << sendCount
+                        << " gapMs=" << sendGapMs
+                        << " samples=" << packetBlock.samples.size()
+                        << " sendLatencyMs=" << sendLatency / 1000000.0
+                        << std::endl;
+                }
             } else {
                 auto tPush0 = std::chrono::steady_clock::now();
 
@@ -76,7 +109,9 @@ void transmitLoop(
 
                 auto tPush1 = std::chrono::steady_clock::now();
                 uint64_t pushLatency =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - tPush0).count();
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        tPush1 - tPush0
+                    ).count();
 
                 gTimingLogger.add("transmit_push", stats.count + 1, pushLatency);
             }
@@ -84,7 +119,9 @@ void transmitLoop(
 
         auto t3 = std::chrono::steady_clock::now();
         uint64_t procLatency =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t_full_delay_start).count();
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                t3 - t_full_delay_start
+            ).count();
 
         stats.proc.update(procLatency);
         gTimingLogger.add("transmit_full_delay", stats.count + 1, procLatency);

@@ -42,6 +42,7 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
 
     unsigned long written = 0;
     uint64_t firstCaptureNs = 0;
+    static uint64_t callbackCount = 0;
 
     // Local jitter buffer. The incoming FIFO contains small blocks
     // e.g. --ms 20 --split 10 gives 10 blocks of 2 ms each.
@@ -61,16 +62,28 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
     // Drain all currently available blocks from the shared FIFO.
     // Use tryPop only: never block inside the PortAudio callback.
     AudioBlock incoming;
+    size_t drained = 0;
+
     auto drainStart = std::chrono::steady_clock::now();
+
     while (fifo.tryPop(incoming, false)) {
         localBuffer.push_back(std::move(incoming));
+        ++drained;
 
         // If network/FIFO bursts build up too much latency, drop oldest blocks.
         while (localBuffer.size() > MAX_LOCAL_BLOCKS) {
             localBuffer.pop_front();
             gTimingLogger.add("player_hw_jitter_drop", blockCount + 1, 1);
+
+            if ((callbackCount % 50) == 0) {
+                std::cout
+                    << "[PLAYER] DROP oldest block, localBuffer="
+                    << localBuffer.size()
+                    << std::endl;
+            }
         }
     }
+
     auto drainEnd = std::chrono::steady_clock::now();
 
     gTimingLogger.add(
@@ -79,34 +92,77 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
         std::chrono::duration_cast<std::chrono::nanoseconds>(drainEnd - drainStart).count()
     );
 
+    if ((callbackCount % 50) == 0) {
+        std::cout
+            << "[PLAYER] callback=" << callbackCount
+            << " drained=" << drained
+            << " localBuffer=" << localBuffer.size()
+            << " started=" << (started ? "yes" : "no")
+            << std::endl;
+    }
+
     // Warm up without discarding audio. Output silence until enough small
     // blocks are buffered, then start consuming localBuffer.
     if (!started) {
         if (localBuffer.size() < START_BLOCKS) {
+            if ((callbackCount % 50) == 0) {
+                std::cout
+                    << "[PLAYER] warmup "
+                    << localBuffer.size()
+                    << "/"
+                    << START_BLOCKS
+                    << " blocks"
+                    << std::endl;
+            }
+
             std::memset(outputBuffer, 0, framesPerBuffer * sizeof(float));
             gTimingLogger.add("player_hw_warmup", blockCount + 1, localBuffer.size());
+
+            ++callbackCount;
             ++blockCount;
             return 0;
         }
+
+        std::cout
+            << "[PLAYER] STARTED playback, localBuffer="
+            << localBuffer.size()
+            << " blocks"
+            << std::endl;
+
         started = true;
     }
+
+    size_t blocksUsed = 0;
 
     // Combine small blocks from the local jitter buffer into one full
     // PortAudio output buffer.
     while (written < framesPerBuffer) {
         if (localBuffer.empty()) {
             // Real underrun: not enough received/decoded data available.
+            std::cout
+                << "[PLAYER] UNDERRUN callback="
+                << callbackCount
+                << " written="
+                << written
+                << "/"
+                << framesPerBuffer
+                << " drained="
+                << drained
+                << std::endl;
+
             std::memset(
                 outputBuffer + written,
                 0,
                 (framesPerBuffer - written) * sizeof(float)
             );
+
             gTimingLogger.add("player_hw_underrun", blockCount + 1, framesPerBuffer - written);
             break;
         }
 
         AudioBlock block = std::move(localBuffer.front());
         localBuffer.pop_front();
+        ++blocksUsed;
 
         if (firstCaptureNs == 0 && block.captureNs != 0) {
             firstCaptureNs = block.captureNs;
@@ -117,6 +173,19 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
             framesPerBuffer - written
         );
 
+        if ((callbackCount % 50) == 0) {
+            std::cout
+                << "[PLAYER]   use block "
+                << blocksUsed
+                << " samples="
+                << block.samples.size()
+                << " copy="
+                << n
+                << " written_before="
+                << written
+                << std::endl;
+        }
+
         if (n > 0) {
             std::memcpy(
                 outputBuffer + written,
@@ -125,6 +194,19 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
             );
             written += n;
         }
+    }
+
+    if ((callbackCount % 50) == 0) {
+        std::cout
+            << "[PLAYER] wrote="
+            << written
+            << " expected="
+            << framesPerBuffer
+            << " blocksUsed="
+            << blocksUsed
+            << " remaining="
+            << localBuffer.size()
+            << std::endl;
     }
 
     auto outputEnd = std::chrono::steady_clock::now();
@@ -144,6 +226,7 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
         gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
     }
 
+    ++callbackCount;
     ++blockCount;
     return 0;
 }
