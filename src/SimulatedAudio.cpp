@@ -2,6 +2,7 @@
 #include "TimingLogger.hpp"
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <thread>
 #include <iostream>
 
@@ -42,12 +43,16 @@ void AudioRecorderSimulator::start() {
             AudioBlock out;
             out.captureNs = captureNs;
             out.samples.assign(buffer.begin() + offset, buffer.begin() + offset + n);
-            fifo.push(out);
+            bool pushed = fifo.tryPush(out, false);
             auto tPush1 = std::chrono::steady_clock::now();
             uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPush1 - steadyPush0).count();
-            pushStats.update(pushLatency);
-            gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
-            ++blockCount;
+            if (pushed) {
+                pushStats.update(pushLatency);
+                gTimingLogger.add("recorder_sim_push", blockCount.load() + 1, pushLatency);
+                ++blockCount;
+            } else {
+                break;
+            }
         }
 
         nextWake += fullBufferDuration;
@@ -74,7 +79,20 @@ void AudioPlayerSimulator::start() {
 
         auto t0 = std::chrono::steady_clock::now();
         while (written < framesPerBuffer) {
-            AudioBlock block = fifo.pop();
+            AudioBlock block;
+            auto tPop0 = std::chrono::steady_clock::now();
+            bool popped = fifo.tryPop(block, false);
+            auto tPop1 = std::chrono::steady_clock::now();
+            uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(tPop1 - tPop0).count();
+            popStats.update(popLatency);
+            gTimingLogger.add("player_sim_pop", blockCount.load() + 1, popLatency);
+
+            if (!popped) {
+                std::memset(output.data() + written, 0, (framesPerBuffer - written) * sizeof(float));
+                written = framesPerBuffer;
+                break;
+            }
+
             if (firstCaptureNs == 0 && block.captureNs != 0) {
                 firstCaptureNs = block.captureNs;
             }
@@ -86,9 +104,9 @@ void AudioPlayerSimulator::start() {
             }
         }
         auto t1 = std::chrono::steady_clock::now();
-        uint64_t popLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
-        popStats.update(popLatency);
-        gTimingLogger.add("player_sim_pop", blockCount.load() + 1, popLatency);
+        uint64_t consumeLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+        consumeStats.update(consumeLatency);
+        gTimingLogger.add("player_sim_consume", blockCount.load() + 1, consumeLatency);
 
         // keep playback timing independent, but do not hold an extra full cycle if behind
         nextPlayback += blockDuration;
@@ -109,11 +127,6 @@ void AudioPlayerSimulator::start() {
             e2eStats->update(latency);
             gTimingLogger.add("player_sim_end_to_end", blockCount.load() + 1, latency);
         }
-
-        auto t3 = std::chrono::steady_clock::now();
-        uint64_t consumeLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count();
-        consumeStats.update(consumeLatency);
-        gTimingLogger.add("player_sim_consume", blockCount.load() + 1, consumeLatency);
 
         ++blockCount;
     }
