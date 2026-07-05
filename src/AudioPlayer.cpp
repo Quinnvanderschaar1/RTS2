@@ -60,25 +60,24 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
 
         started = true;
     }
-
+    auto proc_Start = std::chrono::steady_clock::now();
     while (written < framesPerBuffer) {
         auto popStart = std::chrono::steady_clock::now();
         AudioBlock block;
-
-        if (!fifo.tryPop(block, false)) {
+        bool popped = fifo.tryPop(block, false);
+        auto popEnd = std::chrono::steady_clock::now();
+        
+        if (!popped) {
+            auto popEnd = std::chrono::steady_clock::now();
             std::memset(
                 outputBuffer + written,
                 0,
                 (framesPerBuffer - written) * sizeof(float)
             );
-            auto outputEnd = std::chrono::steady_clock::now();
-            gTimingLogger.add("player_hw_silent_frames", blockCount + 1,
-                std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - outputStart).count());
-            ++blockCount;
             return 0;
         }
 
-        auto popEnd = std::chrono::steady_clock::now();
+        
         gTimingLogger.add("player_hw_pop", blockCount + 1,
             std::chrono::duration_cast<std::chrono::nanoseconds>(popEnd - popStart).count());
 
@@ -100,10 +99,9 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
         written += n;
         ++popCount;
     }
-
     auto outputEnd = std::chrono::steady_clock::now();
-    gTimingLogger.add("player_hw_reconstruct", blockCount + 1,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - outputStart).count());
+    gTimingLogger.add("player_hw_proc", blockCount + 1,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - proc_Start).count());
 
     if (e2eStats && firstCaptureNs != 0) {
         auto playbackTime = std::chrono::system_clock::now();

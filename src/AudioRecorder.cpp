@@ -43,37 +43,38 @@ int AudioRecorder::processInput(
         static_cast<unsigned long>(gProcessFrames);
 
     auto sysNow = std::chrono::system_clock::now();
-    auto steadyNow = std::chrono::steady_clock::now();
+    auto proc_start = std::chrono::steady_clock::now();
 
     uint64_t captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
         sysNow.time_since_epoch()
     ).count();
 
     unsigned long pushedBlocks = 0;
-
+    
     for (unsigned long offset = 0; offset < framesPerBuffer; offset += PROCESS_FRAMES) {
         unsigned long n = std::min(PROCESS_FRAMES, framesPerBuffer - offset);
-
+        auto proc_start = std::chrono::steady_clock::now();
         AudioBlock block;
         block.captureNs = captureNs;
         block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
-
         // Push each smaller processing block immediately so the downstream pipeline
         // can consume it without waiting for the whole callback buffer to be assembled.
-        if (!fifo.tryPush(block, false)) {
+        auto t_pushed_start = std::chrono::steady_clock::now();
+        bool pushed = fifo.tryPush(block, false);
+        auto t_pushed_end = std::chrono::steady_clock::now();
+        if (!pushed) {
             break;
         }
-
+        uint64_t pushLatency =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(t_pushed_end - t_pushed_start).count();
+            gTimingLogger.add("recorder_hw_push", pushedBlocks + 1, pushLatency);
         ++pushedBlocks;
     }
-
-    auto t1 = std::chrono::steady_clock::now();
+    auto proc_end = std::chrono::steady_clock::now();
     uint64_t captureLatency =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - steadyNow).count();
+        std::chrono::duration_cast<std::chrono::nanoseconds>(proc_end - proc_start).count();
 
-    gTimingLogger.add("recorder_hw_capture", blockCount + 1, captureLatency);
-    gTimingLogger.add("recorder_hw_push", blockCount + 1, pushedBlocks);
-
+    gTimingLogger.add("recorder_hw_proc", blockCount + 1, captureLatency);
     ++blockCount;
 
     return 0;
