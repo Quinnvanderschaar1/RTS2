@@ -20,13 +20,16 @@ static void enableRealtimeThread(int cpu = 1, int priority = 70) {
     cpu_set_t cpus;
     CPU_ZERO(&cpus);
     CPU_SET(cpu, &cpus);
+
     pthread_t thread = pthread_self();
+
     if (pthread_setaffinity_np(thread, sizeof(cpus), &cpus) != 0) {
         perror("pthread_setaffinity_np");
     }
 
     sched_param param{};
     param.sched_priority = priority;
+
     if (pthread_setschedparam(thread, SCHED_FIFO, &param) != 0) {
         perror("pthread_setschedparam");
     }
@@ -35,128 +38,64 @@ static void enableRealtimeThread(int cpu = 1, int priority = 70) {
 
 AudioPlayer::AudioPlayer(AudioFifo& fifo) : fifo(fifo) {}
 
-AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
+AudioPlayer::AudioPlayer(AudioFifo& fifo, WCETStats* e2e)
+    : fifo(fifo), e2eStats(e2e) {}
 
 int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) {
     auto procStart = std::chrono::steady_clock::now();
 
-    unsigned long written = 0;
-    uint64_t firstCaptureNs = 0;
-    static uint64_t callbackCount = 0;
-
-    // Local jitter buffer. The incoming FIFO contains small blocks
-    // e.g. --ms 20 --split 10 gives 10 blocks of 2 ms each.
-    // This buffer absorbs small scheduling/network jitter without blocking
-    // inside the PortAudio callback.
     static std::deque<AudioBlock> localBuffer;
     static bool started = false;
 
-    // Start after buffering about two complete 20 ms audio buffers.
-    // For --split 10 this is 20 small blocks = about 40 ms.
-    const size_t START_BLOCKS = static_cast<size_t>(std::max(2 * gBlocksPerPacket, 1));
+    unsigned long written = 0;
+    uint64_t firstCaptureNs = 0;
 
-    // Keep the local buffer bounded so latency cannot grow forever.
-    // For --split 10 this is 80 small blocks = about 160 ms.
-    const size_t MAX_LOCAL_BLOCKS = static_cast<size_t>(std::max(8 * gBlocksPerPacket, 1));
+    const size_t START_BLOCKS =
+        static_cast<size_t>(std::max(3 * gBlocksPerPacket, 1));
 
-    // Drain all currently available blocks from the shared FIFO.
-    // Use tryPop only: never block inside the PortAudio callback.
-    AudioBlock incoming;
+    const size_t MAX_LOCAL_BLOCKS =
+        static_cast<size_t>(std::max(12 * gBlocksPerPacket, 1));
+
     size_t drained = 0;
-
-    auto drainStart = std::chrono::steady_clock::now();
+    AudioBlock incoming;
 
     while (fifo.tryPop(incoming, false)) {
         localBuffer.push_back(std::move(incoming));
         ++drained;
 
-        // If network/FIFO bursts build up too much latency, drop oldest blocks.
         while (localBuffer.size() > MAX_LOCAL_BLOCKS) {
             localBuffer.pop_front();
             gTimingLogger.add("player_hw_jitter_drop", blockCount + 1, 1);
-
-            if ((callbackCount % 50) == 0) {
-                std::cout
-                    << "[PLAYER] DROP oldest block, localBuffer="
-                    << localBuffer.size()
-                    << std::endl;
-            }
         }
     }
 
-    auto drainEnd = std::chrono::steady_clock::now();
-
-    gTimingLogger.add(
-        "player_hw_drain",
-        blockCount + 1,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(drainEnd - drainStart).count()
-    );
-
-    if ((callbackCount % 50) == 0) {
-        std::cout
-            << "[PLAYER] callback=" << callbackCount
-            << " drained=" << drained
-            << " localBuffer=" << localBuffer.size()
-            << " started=" << (started ? "yes" : "no")
-            << std::endl;
-    }
-
-    // Warm up without discarding audio. Output silence until enough small
-    // blocks are buffered, then start consuming localBuffer.
     if (!started) {
         if (localBuffer.size() < START_BLOCKS) {
-            if ((callbackCount % 50) == 0) {
-                std::cout
-                    << "[PLAYER] warmup "
-                    << localBuffer.size()
-                    << "/"
-                    << START_BLOCKS
-                    << " blocks"
-                    << std::endl;
-            }
-
             std::memset(outputBuffer, 0, framesPerBuffer * sizeof(float));
             gTimingLogger.add("player_hw_warmup", blockCount + 1, localBuffer.size());
-
-            ++callbackCount;
             ++blockCount;
             return 0;
         }
-
-        std::cout
-            << "[PLAYER] STARTED playback, localBuffer="
-            << localBuffer.size()
-            << " blocks"
-            << std::endl;
 
         started = true;
     }
 
     size_t blocksUsed = 0;
 
-    // Combine small blocks from the local jitter buffer into one full
-    // PortAudio output buffer.
     while (written < framesPerBuffer) {
         if (localBuffer.empty()) {
-            // Real underrun: not enough received/decoded data available.
-            std::cout
-                << "[PLAYER] UNDERRUN callback="
-                << callbackCount
-                << " written="
-                << written
-                << "/"
-                << framesPerBuffer
-                << " drained="
-                << drained
-                << std::endl;
-
             std::memset(
                 outputBuffer + written,
                 0,
                 (framesPerBuffer - written) * sizeof(float)
             );
 
-            gTimingLogger.add("player_hw_underrun", blockCount + 1, framesPerBuffer - written);
+            gTimingLogger.add(
+                "player_hw_underrun",
+                blockCount + 1,
+                framesPerBuffer - written
+            );
+
             break;
         }
 
@@ -173,60 +112,45 @@ int AudioPlayer::fillOutput(float* outputBuffer, unsigned long framesPerBuffer) 
             framesPerBuffer - written
         );
 
-        if ((callbackCount % 50) == 0) {
-            std::cout
-                << "[PLAYER]   use block "
-                << blocksUsed
-                << " samples="
-                << block.samples.size()
-                << " copy="
-                << n
-                << " written_before="
-                << written
-                << std::endl;
-        }
-
         if (n > 0) {
             std::memcpy(
                 outputBuffer + written,
                 block.samples.data(),
                 n * sizeof(float)
             );
+
             written += n;
         }
     }
 
-    if ((callbackCount % 50) == 0) {
-        std::cout
-            << "[PLAYER] wrote="
-            << written
-            << " expected="
-            << framesPerBuffer
-            << " blocksUsed="
-            << blocksUsed
-            << " remaining="
-            << localBuffer.size()
-            << std::endl;
-    }
+    auto procEnd = std::chrono::steady_clock::now();
 
-    auto outputEnd = std::chrono::steady_clock::now();
     gTimingLogger.add(
         "player_hw_proc",
         blockCount + 1,
-        std::chrono::duration_cast<std::chrono::nanoseconds>(outputEnd - procStart).count()
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            procEnd - procStart
+        ).count()
     );
+
+    gTimingLogger.add("player_hw_drained_blocks", blockCount + 1, drained);
+    gTimingLogger.add("player_hw_used_blocks", blockCount + 1, blocksUsed);
+    gTimingLogger.add("player_hw_remaining_blocks", blockCount + 1, localBuffer.size());
 
     if (e2eStats && firstCaptureNs != 0) {
         auto playbackTime = std::chrono::system_clock::now();
-        uint64_t playbackNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            playbackTime.time_since_epoch()
-        ).count();
+
+        uint64_t playbackNs =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                playbackTime.time_since_epoch()
+            ).count();
+
         uint64_t latency = playbackNs - firstCaptureNs;
+
         e2eStats->update(latency);
         gTimingLogger.add("player_hw_end_to_end", blockCount + 1, latency);
     }
 
-    ++callbackCount;
     ++blockCount;
     return 0;
 }
@@ -245,13 +169,14 @@ int AudioPlayer::playCallback(
 
     AudioPlayer* player = static_cast<AudioPlayer*>(userData);
     player->fillOutput(static_cast<float*>(outputBuffer), framesPerBuffer);
+
     return paContinue;
 }
 
 void AudioPlayer::start() {
     enableRealtimeThread(1, 29);
 
-    Pa_OpenDefaultStream(
+    PaError err = Pa_OpenDefaultStream(
         &stream,
         0,
         CHANNELS,
@@ -262,7 +187,20 @@ void AudioPlayer::start() {
         this
     );
 
-    Pa_StartStream(stream);
+    if (err != paNoError) {
+        std::cerr << "Player Pa_OpenDefaultStream failed: "
+                  << Pa_GetErrorText(err) << std::endl;
+        return;
+    }
+
+    err = Pa_StartStream(stream);
+
+    if (err != paNoError) {
+        std::cerr << "Player Pa_StartStream failed: "
+                  << Pa_GetErrorText(err) << std::endl;
+        Pa_CloseStream(stream);
+        return;
+    }
 
     while (true) {
         Pa_Sleep(1000);

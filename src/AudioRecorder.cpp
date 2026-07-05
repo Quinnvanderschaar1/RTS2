@@ -1,30 +1,35 @@
 ﻿#include "AudioRecorder.hpp"
 #include "TimingLogger.hpp"
+
+#include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <iostream>
-#include <vector>
-#include <chrono>
 #include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
+#include <vector>
+
 #include "Globals.hpp"
 
 constexpr int SAMPLE_RATE = 48000;
 constexpr int CHANNELS = 1;
-
 
 static void enableRealtimeThread(int cpu = 0, int priority = 30) {
 #if defined(__linux__)
     cpu_set_t cpus;
     CPU_ZERO(&cpus);
     CPU_SET(cpu, &cpus);
+
     pthread_t thread = pthread_self();
+
     if (pthread_setaffinity_np(thread, sizeof(cpus), &cpus) != 0) {
         perror("pthread_setaffinity_np");
     }
 
     sched_param param{};
     param.sched_priority = priority;
+
     if (pthread_setschedparam(thread, SCHED_FIFO, &param) != 0) {
         perror("pthread_setschedparam");
     }
@@ -33,7 +38,8 @@ static void enableRealtimeThread(int cpu = 0, int priority = 30) {
 
 AudioRecorder::AudioRecorder(AudioFifo& fifo) : fifo(fifo) {}
 
-AudioRecorder::AudioRecorder(AudioFifo& fifo, WCETStats* e2e) : fifo(fifo), e2eStats(e2e) {}
+AudioRecorder::AudioRecorder(AudioFifo& fifo, WCETStats* e2e)
+    : fifo(fifo), e2eStats(e2e) {}
 
 int AudioRecorder::processInput(
     const float* inputBuffer,
@@ -43,11 +49,12 @@ int AudioRecorder::processInput(
         static_cast<unsigned long>(gProcessFrames);
 
     auto sysNow = std::chrono::system_clock::now();
-    auto proc_start = std::chrono::steady_clock::now();
+    auto procStart = std::chrono::steady_clock::now();
 
-    uint64_t captureNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        sysNow.time_since_epoch()
-    ).count();
+    uint64_t captureNs =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+            sysNow.time_since_epoch()
+        ).count();
 
     unsigned long pushedBlocks = 0;
 
@@ -58,17 +65,16 @@ int AudioRecorder::processInput(
         block.captureNs = captureNs;
         block.samples.assign(inputBuffer + offset, inputBuffer + offset + n);
 
-        auto t_pushed_start = std::chrono::steady_clock::now();
+        auto pushStart = std::chrono::steady_clock::now();
 
-        // Important change:
-        // Use blocking push so recorder does not silently drop 2 ms blocks.
+        // Important: do not silently drop blocks.
         fifo.push(block);
 
-        auto t_pushed_end = std::chrono::steady_clock::now();
+        auto pushEnd = std::chrono::steady_clock::now();
 
         uint64_t pushLatency =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
-                t_pushed_end - t_pushed_start
+                pushEnd - pushStart
             ).count();
 
         gTimingLogger.add("recorder_hw_push", pushedBlocks + 1, pushLatency);
@@ -85,11 +91,11 @@ int AudioRecorder::processInput(
         ++pushedBlocks;
     }
 
-    auto proc_end = std::chrono::steady_clock::now();
+    auto procEnd = std::chrono::steady_clock::now();
 
     uint64_t captureLatency =
         std::chrono::duration_cast<std::chrono::nanoseconds>(
-            proc_end - proc_start
+            procEnd - procStart
         ).count();
 
     gTimingLogger.add("recorder_hw_proc", blockCount + 1, captureLatency);
@@ -113,16 +119,19 @@ int AudioRecorder::recordCallback(
 
     AudioRecorder* recorder = static_cast<AudioRecorder*>(userData);
     const float* in = static_cast<const float*>(inputBuffer);
+
     if (in == nullptr) {
         static std::vector<float> silence;
 
         if (silence.size() != static_cast<size_t>(gFramesPerBuffer)) {
             silence.assign(gFramesPerBuffer, 0.0f);
         }
+
         recorder->processInput(silence.data(), framesPerBuffer);
     } else {
         recorder->processInput(in, framesPerBuffer);
     }
+
     return paContinue;
 }
 
@@ -157,7 +166,6 @@ void AudioRecorder::start() {
               << Pa_IsStreamActive(stream)
               << std::endl;
 
-    // Move realtime priority here
     enableRealtimeThread(0, 30);
 
     while (true) {

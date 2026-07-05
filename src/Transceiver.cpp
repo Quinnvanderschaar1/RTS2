@@ -1,9 +1,11 @@
 #include "Transceiver.hpp"
 #include "TimingLogger.hpp"
+
 #include <chrono>
 #include <iostream>
 
 #include "Globals.hpp"
+
 void transmitLoop(
     AudioFifo& micFifo,
     AudioFifo& playbackFifo,
@@ -18,30 +20,40 @@ void transmitLoop(
         uint64_t count{0};
     } stats;
 
-    static uint64_t sendCount = 0;
-    static auto lastSend = std::chrono::steady_clock::now();
-
     while (true) {
-        auto t_proc_start = std::chrono::steady_clock::now();
-        auto t_proc_end = std::chrono::steady_clock::now();
-        auto t_full_delay_start = std::chrono::steady_clock::now();
+        auto fullStart = std::chrono::steady_clock::now();
 
         AudioBlock packetBlock;
         packetBlock.samples.reserve(gFramesPerBuffer);
 
         bool gotAny = false;
+        uint64_t totalPopLatency = 0;
 
         for (int i = 0; i < gBlocksPerPacket; ++i) {
-            auto t0 = std::chrono::steady_clock::now();
+            auto popStart = std::chrono::steady_clock::now();
 
             AudioBlock smallBlock = micFifo.pop();
 
-            auto t1 = std::chrono::steady_clock::now();
-            uint64_t popLatency =
-                std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+            auto popEnd = std::chrono::steady_clock::now();
 
+            uint64_t popLatency =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    popEnd - popStart
+                ).count();
+
+            totalPopLatency += popLatency;
             stats.pop.update(popLatency);
+
             gTimingLogger.add("transmit_block_pop", stats.count + 1, popLatency);
+
+            if (popLatency > 30000000) {
+                std::cout
+                    << "[SEND] slow micFifo.pop i="
+                    << i
+                    << " popMs="
+                    << popLatency / 1000000.0
+                    << std::endl;
+            }
 
             if (!gotAny) {
                 packetBlock.captureNs = smallBlock.captureNs;
@@ -49,82 +61,66 @@ void transmitLoop(
                 gotAny = true;
             }
 
-            t_proc_start = std::chrono::steady_clock::now();
-
             packetBlock.samples.insert(
                 packetBlock.samples.end(),
                 smallBlock.samples.begin(),
                 smallBlock.samples.end()
             );
-
-            t_proc_end = std::chrono::steady_clock::now();
         }
 
-        int mult = gBlocksPerPacket;
-        uint64_t proc =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(
-                t_proc_end - t_proc_start
-            ).count();
+        gTimingLogger.add("transmit_pop_total", stats.count + 1, totalPopLatency);
 
-        gTimingLogger.add("transmit_block_proc", stats.count + 1, proc * mult);
+        auto activeStart = std::chrono::steady_clock::now();
 
         bool active = isActive();
         setLed(active);
 
         if (active) {
             if (sender != nullptr) {
-                auto tSend0 = std::chrono::steady_clock::now();
+                auto sendStart = std::chrono::steady_clock::now();
 
                 sender->sendBlock(packetBlock);
 
-                auto tSend1 = std::chrono::steady_clock::now();
+                auto sendEnd = std::chrono::steady_clock::now();
+
                 uint64_t sendLatency =
                     std::chrono::duration_cast<std::chrono::nanoseconds>(
-                        tSend1 - tSend0
+                        sendEnd - sendStart
                     ).count();
 
                 gTimingLogger.add("transmit_send", stats.count + 1, sendLatency);
-
-                auto nowSend = std::chrono::steady_clock::now();
-                double sendGapMs =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(
-                        nowSend - lastSend
-                    ).count() / 1000000.0;
-
-                lastSend = nowSend;
-                ++sendCount;
-
-                if ((sendCount % 50) == 0) {
-                    std::cout
-                        << "[SEND] count=" << sendCount
-                        << " gapMs=" << sendGapMs
-                        << " samples=" << packetBlock.samples.size()
-                        << " sendLatencyMs=" << sendLatency / 1000000.0
-                        << std::endl;
-                }
             } else {
-                auto tPush0 = std::chrono::steady_clock::now();
+                auto pushStart = std::chrono::steady_clock::now();
 
                 playbackFifo.push(packetBlock);
 
-                auto tPush1 = std::chrono::steady_clock::now();
+                auto pushEnd = std::chrono::steady_clock::now();
+
                 uint64_t pushLatency =
                     std::chrono::duration_cast<std::chrono::nanoseconds>(
-                        tPush1 - tPush0
+                        pushEnd - pushStart
                     ).count();
 
                 gTimingLogger.add("transmit_push", stats.count + 1, pushLatency);
             }
         }
 
-        auto t3 = std::chrono::steady_clock::now();
-        uint64_t procLatency =
+        auto fullEnd = std::chrono::steady_clock::now();
+
+        uint64_t fullLatency =
             std::chrono::duration_cast<std::chrono::nanoseconds>(
-                t3 - t_full_delay_start
+                fullEnd - fullStart
             ).count();
 
-        stats.proc.update(procLatency);
-        gTimingLogger.add("transmit_full_delay", stats.count + 1, procLatency);
+        uint64_t activeLatency =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                fullEnd - activeStart
+            ).count();
+
+        stats.proc.update(fullLatency);
+
+        gTimingLogger.add("transmit_active_send_or_push", stats.count + 1, activeLatency);
+        gTimingLogger.add("transmit_full_delay", stats.count + 1, fullLatency);
 
         ++stats.count;
     }
@@ -138,13 +134,16 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
     const int PROCESS_FRAMES = gProcessFrames;
 
     while (true) {
-        auto t0 = std::chrono::steady_clock::now();
+        auto recvStart = std::chrono::steady_clock::now();
 
         AudioBlock remoteBlock = receiver.receiveBlock(gFramesPerBuffer);
 
-        auto t1 = std::chrono::steady_clock::now();
+        auto recvEnd = std::chrono::steady_clock::now();
+
         uint64_t recvLatency =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                recvEnd - recvStart
+            ).count();
 
         if (remoteBlock.samples.empty()) {
             continue;
@@ -152,13 +151,17 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
 
         recvStats.update(recvLatency);
         gTimingLogger.add("receive_recv", receivedCount + 1, recvLatency);
-        auto t_receive_proc_start = std::chrono::steady_clock::now();
-        auto t_receive_proc_end = std::chrono::steady_clock::now();
-        auto t2 = std::chrono::steady_clock::now();
+
+        auto splitPushStart = std::chrono::steady_clock::now();
+
+        size_t pushedBlocks = 0;
 
         for (size_t offset = 0; offset < remoteBlock.samples.size(); offset += PROCESS_FRAMES) {
-            auto t_receive_proc_start = std::chrono::steady_clock::now();
-            size_t n = std::min<size_t>(PROCESS_FRAMES, remoteBlock.samples.size() - offset);
+            size_t n = std::min<size_t>(
+                PROCESS_FRAMES,
+                remoteBlock.samples.size() - offset
+            );
+
             AudioBlock smallBlock;
             smallBlock.captureNs = remoteBlock.captureNs;
             smallBlock.sendNs = remoteBlock.sendNs;
@@ -167,20 +170,34 @@ void receiveLoop(AudioFifo& playbackFifo, UdpReceiver& receiver) {
                 remoteBlock.samples.begin() + offset,
                 remoteBlock.samples.begin() + offset + n
             );
-            auto t_receive_proc_end = std::chrono::steady_clock::now();
-            auto t_start_push = std::chrono::steady_clock::now();
+
+            auto pushStart = std::chrono::steady_clock::now();
+
             playbackFifo.push(std::move(smallBlock));
-            auto t_end_push = std::chrono::steady_clock::now();
-            uint64_t pushLatency = std::chrono::duration_cast<std::chrono::nanoseconds>(t_end_push - t_start_push).count();
+
+            auto pushEnd = std::chrono::steady_clock::now();
+
+            uint64_t pushLatency =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    pushEnd - pushStart
+                ).count();
+
             pushStats.update(pushLatency);
-            gTimingLogger.add("receive_Block_push", receivedCount + 1, pushLatency);
+            gTimingLogger.add("receive_block_push", receivedCount + 1, pushLatency);
+
+            ++pushedBlocks;
         }
-        int mult = (remoteBlock.samples.size() + PROCESS_FRAMES - 1) / PROCESS_FRAMES;
-        
-        uint64_t procLatency =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(t_receive_proc_end - t_receive_proc_start).count();
-        
-        gTimingLogger.add("receive_block_proc", receivedCount + 1, procLatency * mult);
+
+        auto splitPushEnd = std::chrono::steady_clock::now();
+
+        uint64_t splitPushLatency =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                splitPushEnd - splitPushStart
+            ).count();
+
+        gTimingLogger.add("receive_split_push_total", receivedCount + 1, splitPushLatency);
+        gTimingLogger.add("receive_pushed_blocks", receivedCount + 1, pushedBlocks);
+
         ++receivedCount;
     }
 }
