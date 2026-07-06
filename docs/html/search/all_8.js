@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['queuelatencysample_0',['QueueLatencySample',['../structQueueLatencySample.html',1,'']]]
+  ['networkjittersample_0',['NetworkJitterSample',['../structNetworkJitterSample.html',1,'']]]
 ];

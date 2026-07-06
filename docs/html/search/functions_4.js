@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mix_0',['mix',['../classAudioMixer.html#a38a358b29bceb376511822e84537c780',1,'AudioMixer']]]
+  ['lowpass_0',['lowPass',['../classAudioProcessing.html#aee43a91eea9cfd9dd6ccf67b8cd314a1',1,'AudioProcessing']]]
 ];

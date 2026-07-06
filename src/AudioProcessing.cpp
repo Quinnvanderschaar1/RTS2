@@ -73,3 +73,12 @@ std::vector<float> AudioProcessing::audioDecoding(
     }
     return output;
 }
+
+void AudioProcessing::HeavyLoop(int loop_size=0
+) {
+    // Simulate a heavy processing loop
+    volatile double sum = 0.0;
+    for (int i = 0; i < loop_size; ++i) {
+        sum += std::sin(i) * std::cos(i);
+    }
+}

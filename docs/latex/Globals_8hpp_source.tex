@@ -4,13 +4,33 @@
 \begin{DoxyCode}{0}
 \DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
 \DoxyCodeLine{00002\ }
-\DoxyCodeLine{00003\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gFrameDivisor;}
-\DoxyCodeLine{00004\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gFramesPerBuffer;}
-\DoxyCodeLine{00005\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ FIFO\_SIZE;}
-\DoxyCodeLine{00006\ }
-\DoxyCodeLine{00007\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gAudioMs;}
-\DoxyCodeLine{00008\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gSplitDivisor;}
-\DoxyCodeLine{00009\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gProcessFrames;}
-\DoxyCodeLine{00010\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gBlocksPerPacket;}
+\DoxyCodeLine{00003\ \textcolor{comment}{//\ Legacy/global\ frame\ divisor\ used\ by\ older\ code\ paths.}}
+\DoxyCodeLine{00004\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gFrameDivisor;}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00006\ \textcolor{comment}{//\ Total\ number\ of\ audio\ frames\ in\ one\ full\ audio\ buffer\ for\ a\ given\ audio\ block\ duration.}}
+\DoxyCodeLine{00007\ \textcolor{comment}{//\ Example:\ 48\ kHz\ *\ 10\ ms\ =\ 480\ frames.}}
+\DoxyCodeLine{00008\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gFramesPerBuffer;}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{comment}{//\ Capacity\ of\ the\ FIFO\ queues\ between\ pipeline\ stages.}}
+\DoxyCodeLine{00011\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ FIFO\_SIZE;}
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{comment}{//\ Optional\ loop\ size\ used\ by\ the\ heavy-\/loop\ benchmark\ path.}}
+\DoxyCodeLine{00014\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ loop\_size;}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{comment}{//\ Audio\ block\ duration\ in\ milliseconds.}}
+\DoxyCodeLine{00017\ \textcolor{comment}{//\ This\ is\ converted\ into\ frames\ using\ the\ sample\ rate\ in\ Application.cpp.}}
+\DoxyCodeLine{00018\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gAudioMs;}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{comment}{//\ How\ many\ smaller\ processing\ blocks\ one\ full\ buffer\ is\ split\ into.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{//\ Example:\ if\ gFramesPerBuffer\ is\ 480\ and\ gSplitDivisor\ is\ 10,\ each\ processing\ block\ is\ 48\ frames.}}
+\DoxyCodeLine{00022\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gSplitDivisor;}
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ \textcolor{comment}{//\ Number\ of\ frames\ handled\ by\ each\ processing\ block.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{//\ Computed\ as\ gFramesPerBuffer\ /\ gSplitDivisor.}}
+\DoxyCodeLine{00026\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gProcessFrames;}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{comment}{//\ How\ many\ processing\ blocks\ are\ grouped\ together\ into\ one\ outgoing\ packet.}}
+\DoxyCodeLine{00029\ \textcolor{comment}{//\ In\ the\ current\ setup\ it\ is\ set\ equal\ to\ gSplitDivisor,\ so\ one\ full\ buffer\ becomes\ one\ packet.}}
+\DoxyCodeLine{00030\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{int}\ gBlocksPerPacket;}
 
 \end{DoxyCode}

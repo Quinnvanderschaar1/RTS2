@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['wcetstats_0',['WCETStats',['../structWCETStats.html',1,'']]]
+  ['timinglogger_0',['TimingLogger',['../classTimingLogger.html',1,'']]],
+  ['timingsample_1',['TimingSample',['../structTimingSample.html',1,'']]]
 ];

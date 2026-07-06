@@ -22,6 +22,11 @@ void TimingLogger::addNetworkJitter(const NetworkJitterSample& s) {
     networkSamples.push_back(s);
 }
 
+void TimingLogger::addDropSample(const DropSample& s) {
+    std::lock_guard<std::mutex> lock(mutex);
+    dropSamples.push_back(s);
+}
+
 void TimingLogger::saveCSV(const std::string& filename) {
     printf("Saving timing report to %s...\n", filename.c_str());
     std::lock_guard<std::mutex> lock(mutex);
@@ -43,9 +48,9 @@ void TimingLogger::saveCSV(const std::string& filename) {
 void TimingLogger::saveFifoCSV(const std::string& filename) {
     std::lock_guard<std::mutex> lock(mutex);
     std::ofstream file(filename);
-    file << "timestamp_ns,event,current_size,max_size,avg_size\n";
+    file << "timestamp_ns,fifo_name,event,current_size,max_size,avg_size\n";
     for (const auto& s : fifoSamples) {
-        file << s.tsNs << "," << s.event << "," << s.currentSize << "," << s.maxSize << "," << s.avgSize << "\n";
+        file << s.tsNs << "," << s.fifoName << "," << s.event << "," << s.currentSize << "," << s.maxSize << "," << s.avgSize << "\n";
     }
 }
 
@@ -64,6 +69,15 @@ void TimingLogger::saveNetworkCSV(const std::string& filename) {
     file << "send_ns,recv_ns,diff_ns\n";
     for (const auto& s : networkSamples) {
         file << s.sendNs << "," << s.recvNs << "," << s.diffNs << "\n";
+    }
+}
+
+void TimingLogger::saveDropCSV(const std::string& filename) {
+    std::lock_guard<std::mutex> lock(mutex);
+    std::ofstream file(filename);
+    file << "timestamp_ns,fifo_name,process,reason\n";
+    for (const auto& s : dropSamples) {
+        file << s.tsNs << "," << s.fifoName << "," << s.process << "," << s.reason << "\n";
     }
 }
 

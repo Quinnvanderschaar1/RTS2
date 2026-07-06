@@ -7,43 +7,46 @@
 \DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <queue>}}
 \DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <vector>}}
 \DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <cstdint>}}
-\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <pthread.h>}}
-\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}Globals.hpp"{}}}
-\DoxyCodeLine{00008\ }
-\DoxyCodeLine{00017\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ \{}
-\DoxyCodeLine{00018\ \ \ \ \ uint64\_t\ captureNs\{0\};}
-\DoxyCodeLine{00019\ \ \ \ \ uint64\_t\ pushNs\{0\};}
-\DoxyCodeLine{00020\ \ \ \ \ uint64\_t\ sendNs\{0\};}
-\DoxyCodeLine{00021\ \ \ \ \ std::vector<float>\ samples;}
-\DoxyCodeLine{00022\ \};}
-\DoxyCodeLine{00023\ }
-\DoxyCodeLine{00024\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\ \{}
-\DoxyCodeLine{00025\ \textcolor{keyword}{private}:}
-\DoxyCodeLine{00029\ \ \ \ \ std::queue<AudioBlock>\ queue;}
-\DoxyCodeLine{00030\ }
-\DoxyCodeLine{00034\ \ \ \ \ pthread\_mutex\_t\ mutex;}
-\DoxyCodeLine{00035\ }
-\DoxyCodeLine{00039\ \ \ \ \ pthread\_cond\_t\ cond;}
-\DoxyCodeLine{00040\ }
-\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ capacity;}
-\DoxyCodeLine{00045\ }
-\DoxyCodeLine{00046\ \ \ \ \ \textcolor{comment}{//\ occupancy\ tracking}}
-\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ maxSize\{0\};}
-\DoxyCodeLine{00048\ \ \ \ \ uint64\_t\ cumulativeSize\{0\};}
-\DoxyCodeLine{00049\ \ \ \ \ uint64\_t\ occupancyCount\{0\};}
-\DoxyCodeLine{00050\ }
-\DoxyCodeLine{00051\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00056\ \ \ \ \ \mbox{\hyperlink{classAudioFifo_a904c6ec6dddb90f318c4da6b223d0ee8}{AudioFifo}}(\textcolor{keywordtype}{size\_t}\ capacity\ =\ FIFO\_SIZE);}
-\DoxyCodeLine{00057\ }
-\DoxyCodeLine{00061\ \ \ \ \ \mbox{\hyperlink{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b}{\string~AudioFifo}}();}
-\DoxyCodeLine{00062\ }
-\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classAudioFifo_aac4aafc6af6d5eec02b5bd7c9aecabe2}{push}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ block);}
-\DoxyCodeLine{00069\ }
-\DoxyCodeLine{00077\ \ \ \ \ \mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ \mbox{\hyperlink{classAudioFifo_aee80829576455eb23e8bb9811d7ed9a1}{pop}}();}
-\DoxyCodeLine{00078\ }
-\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classAudioFifo_acd64fb9dec68dc0830e488004cb6b8e7}{tryPush}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ block,\ \textcolor{keywordtype}{bool}\ log\ =\ \textcolor{keyword}{true});}
-\DoxyCodeLine{00085\ }
-\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classAudioFifo_ac7f9e696213dcca2aef62bb532790746}{tryPop}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\&\ block,\ \textcolor{keywordtype}{bool}\ log\ =\ \textcolor{keyword}{true});}
-\DoxyCodeLine{00092\ \};}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ <pthread.h>}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}Globals.hpp"{}}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ \{}
+\DoxyCodeLine{00019\ \ \ \ \ uint64\_t\ captureNs\{0\};}
+\DoxyCodeLine{00020\ \ \ \ \ uint64\_t\ pushNs\{0\};}
+\DoxyCodeLine{00021\ \ \ \ \ uint64\_t\ sendNs\{0\};}
+\DoxyCodeLine{00022\ \ \ \ \ std::vector<float>\ samples;}
+\DoxyCodeLine{00023\ \};}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classAudioFifo}{AudioFifo}}\ \{}
+\DoxyCodeLine{00026\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00030\ \ \ \ \ std::string\ fifoName;}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00035\ \ \ \ \ std::queue<AudioBlock>\ queue;}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00040\ \ \ \ \ pthread\_mutex\_t\ mutex;}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00045\ \ \ \ \ pthread\_cond\_t\ cond;}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00050\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ capacity;}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{comment}{//\ occupancy\ tracking}}
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ maxSize\{0\};}
+\DoxyCodeLine{00054\ \ \ \ \ uint64\_t\ cumulativeSize\{0\};}
+\DoxyCodeLine{00055\ \ \ \ \ uint64\_t\ occupancyCount\{0\};}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00062\ \ \ \ \ \mbox{\hyperlink{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5}{AudioFifo}}(\textcolor{keywordtype}{size\_t}\ capacity\ =\ FIFO\_SIZE,\ \textcolor{keyword}{const}\ std::string\&\ name\ =\ \textcolor{stringliteral}{"{}fifo"{}});}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00067\ \ \ \ \ \mbox{\hyperlink{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b}{\string~AudioFifo}}();}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00074\ \ \ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classAudioFifo_aac4aafc6af6d5eec02b5bd7c9aecabe2}{push}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ block);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00083\ \ \ \ \ \mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ \mbox{\hyperlink{classAudioFifo_aee80829576455eb23e8bb9811d7ed9a1}{pop}}();}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classAudioFifo_acd64fb9dec68dc0830e488004cb6b8e7}{tryPush}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\ block,\ \textcolor{keywordtype}{bool}\ log\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{classAudioFifo_ac7f9e696213dcca2aef62bb532790746}{tryPop}}(\mbox{\hyperlink{structAudioBlock}{AudioBlock}}\&\ block,\ \textcolor{keywordtype}{bool}\ log\ =\ \textcolor{keyword}{true});}
+\DoxyCodeLine{00098\ \};}
 
 \end{DoxyCode}

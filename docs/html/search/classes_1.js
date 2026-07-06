@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['fifosample_0',['FifoSample',['../structFifoSample.html',1,'']]]
+  ['dropsample_0',['DropSample',['../structDropSample.html',1,'']]]
 ];

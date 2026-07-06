@@ -3,7 +3,8 @@
 
 #include <chrono>
 
-AudioFifo::AudioFifo(size_t capacity_) : capacity(capacity_) {
+AudioFifo::AudioFifo(size_t capacity_, const std::string& name)
+    : fifoName(name), capacity(capacity_) {
     pthread_mutex_init(&mutex, nullptr);
     pthread_cond_init(&cond, nullptr);
 }
@@ -35,7 +36,7 @@ void AudioFifo::push(AudioBlock block) {
     pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mutex);
 
-    FifoSample s{nowNs, std::string("push"), cur, maxSize, avg};
+    FifoSample s{nowNs, fifoName, std::string("push"), cur, maxSize, avg};
     gTimingLogger.addFifoSample(s);
 }
 
@@ -62,7 +63,7 @@ AudioBlock AudioFifo::pop() {
     uint64_t nowNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
 
-    FifoSample fs{nowNs, std::string("pop"), cur, maxSize, avg};
+    FifoSample fs{nowNs, fifoName, std::string("pop"), cur, maxSize, avg};
     gTimingLogger.addFifoSample(fs);
 
     if (block.pushNs != 0) {
@@ -84,6 +85,7 @@ bool AudioFifo::tryPush(AudioBlock block, bool log) {
 
     if (queue.size() >= capacity) {
         pthread_mutex_unlock(&mutex);
+        gTimingLogger.addDropSample({nowNs, fifoName, "unknown", "fifo_full"});
         return false;
     }
 
@@ -98,7 +100,7 @@ bool AudioFifo::tryPush(AudioBlock block, bool log) {
     pthread_mutex_unlock(&mutex);
 
     if (log) {
-        FifoSample s{nowNs, std::string("push"), cur, maxSize, avg};
+        FifoSample s{nowNs, fifoName, std::string("push"), cur, maxSize, avg};
         gTimingLogger.addFifoSample(s);
     }
     return true;
@@ -130,7 +132,7 @@ bool AudioFifo::tryPop(AudioBlock& block, bool log) {
         std::chrono::steady_clock::now().time_since_epoch()).count();
 
     if (log) {
-        FifoSample fs{nowNs, std::string("pop"), cur, maxSize, avg};
+        FifoSample fs{nowNs, fifoName, std::string("pop"), cur, maxSize, avg};
         gTimingLogger.addFifoSample(fs);
 
         if (block.pushNs != 0) {

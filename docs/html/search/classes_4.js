@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['simulateduserinterface_0',['SimulatedUserInterface',['../classSimulatedUserInterface.html',1,'']]]
+  ['programoptions_0',['ProgramOptions',['../structProgramOptions.html',1,'']]]
 ];
