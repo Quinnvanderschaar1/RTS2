@@ -20,6 +20,11 @@ std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_a0c8498c2683142
 \begin{DoxyCompactList}\small\item\em Applies simple audio encoding. \end{DoxyCompactList}\item 
 std\+::vector$<$ float $>$ \mbox{\hyperlink{classAudioProcessing_a0382f22329f46503535ec401a92116c4}{audio\+Decoding}} (const std\+::vector$<$ float $>$ \&input)
 \begin{DoxyCompactList}\small\item\em Applies simple audio decoding. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{classAudioProcessing_a45539d4e741eba2c9a2f0d6805ec2359}{Heavy\+Loop}} (int loop\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Applies simple heavy loop processing. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
@@ -86,6 +91,21 @@ This subtracts a delayed and scaled version of the signal.
 \begin{DoxyReturn}{Returns}
 Echo-\/reduced audio samples. 
 \end{DoxyReturn}
+\Hypertarget{classAudioProcessing_a45539d4e741eba2c9a2f0d6805ec2359}\label{classAudioProcessing_a45539d4e741eba2c9a2f0d6805ec2359} 
+\index{AudioProcessing@{AudioProcessing}!HeavyLoop@{HeavyLoop}}
+\index{HeavyLoop@{HeavyLoop}!AudioProcessing@{AudioProcessing}}
+\doxysubsubsection{\texorpdfstring{HeavyLoop()}{HeavyLoop()}}
+{\footnotesize\ttfamily static void Audio\+Processing\+::\+Heavy\+Loop (\begin{DoxyParamCaption}\item[{int}]{loop\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Applies simple heavy loop processing. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & Input audio samples. \\
+\hline
+\end{DoxyParams}
 \Hypertarget{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1}\label{classAudioProcessing_aee43a91eea9cfd9dd6ccf67b8cd314a1} 
 \index{AudioProcessing@{AudioProcessing}!lowPass@{lowPass}}
 \index{lowPass@{lowPass}!AudioProcessing@{AudioProcessing}}

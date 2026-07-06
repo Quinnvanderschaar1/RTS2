@@ -17,45 +17,56 @@
 \DoxyCodeLine{00013\ }
 \DoxyCodeLine{00014\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structFifoSample}{FifoSample}}\ \{}
 \DoxyCodeLine{00015\ \ \ \ \ uint64\_t\ tsNs;}
-\DoxyCodeLine{00016\ \ \ \ \ std::string\ event;\ \textcolor{comment}{//\ "{}push"{}\ or\ "{}pop"{}}}
-\DoxyCodeLine{00017\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ currentSize;}
-\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ maxSize;}
-\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{double}\ avgSize;}
-\DoxyCodeLine{00020\ \};}
-\DoxyCodeLine{00021\ }
-\DoxyCodeLine{00022\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structQueueLatencySample}{QueueLatencySample}}\ \{}
-\DoxyCodeLine{00023\ \ \ \ \ uint64\_t\ pushNs;}
-\DoxyCodeLine{00024\ \ \ \ \ uint64\_t\ popNs;}
-\DoxyCodeLine{00025\ \ \ \ \ uint64\_t\ latencyNs;}
-\DoxyCodeLine{00026\ \};}
-\DoxyCodeLine{00027\ }
-\DoxyCodeLine{00028\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structNetworkJitterSample}{NetworkJitterSample}}\ \{}
-\DoxyCodeLine{00029\ \ \ \ \ uint64\_t\ sendNs;}
-\DoxyCodeLine{00030\ \ \ \ \ uint64\_t\ recvNs;}
-\DoxyCodeLine{00031\ \ \ \ \ int64\_t\ diffNs;}
-\DoxyCodeLine{00032\ \};}
-\DoxyCodeLine{00033\ }
-\DoxyCodeLine{00034\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTimingLogger}{TimingLogger}}\ \{}
-\DoxyCodeLine{00035\ \textcolor{keyword}{public}:}
-\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keywordtype}{void}\ add(\textcolor{keyword}{const}\ std::string\&\ stage,\ uint64\_t\ block,\ uint64\_t\ latencyNs);}
-\DoxyCodeLine{00037\ }
-\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ addFifoSample(\textcolor{keyword}{const}\ \mbox{\hyperlink{structFifoSample}{FifoSample}}\&\ s);}
-\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keywordtype}{void}\ addQueueLatency(\textcolor{keyword}{const}\ \mbox{\hyperlink{structQueueLatencySample}{QueueLatencySample}}\&\ s);}
-\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keywordtype}{void}\ addNetworkJitter(\textcolor{keyword}{const}\ \mbox{\hyperlink{structNetworkJitterSample}{NetworkJitterSample}}\&\ s);}
+\DoxyCodeLine{00016\ \ \ \ \ std::string\ fifoName;}
+\DoxyCodeLine{00017\ \ \ \ \ std::string\ event;\ \textcolor{comment}{//\ "{}push"{}\ or\ "{}pop"{}}}
+\DoxyCodeLine{00018\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ currentSize;}
+\DoxyCodeLine{00019\ \ \ \ \ \textcolor{keywordtype}{size\_t}\ maxSize;}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keywordtype}{double}\ avgSize;}
+\DoxyCodeLine{00021\ \};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structQueueLatencySample}{QueueLatencySample}}\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ uint64\_t\ pushNs;}
+\DoxyCodeLine{00025\ \ \ \ \ uint64\_t\ popNs;}
+\DoxyCodeLine{00026\ \ \ \ \ uint64\_t\ latencyNs;}
+\DoxyCodeLine{00027\ \};}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structNetworkJitterSample}{NetworkJitterSample}}\ \{}
+\DoxyCodeLine{00030\ \ \ \ \ uint64\_t\ sendNs;}
+\DoxyCodeLine{00031\ \ \ \ \ uint64\_t\ recvNs;}
+\DoxyCodeLine{00032\ \ \ \ \ int64\_t\ diffNs;}
+\DoxyCodeLine{00033\ \};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structDropSample}{DropSample}}\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ uint64\_t\ tsNs;}
+\DoxyCodeLine{00037\ \ \ \ \ std::string\ fifoName;}
+\DoxyCodeLine{00038\ \ \ \ \ std::string\ process;}
+\DoxyCodeLine{00039\ \ \ \ \ std::string\ reason;}
+\DoxyCodeLine{00040\ \};}
 \DoxyCodeLine{00041\ }
-\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordtype}{void}\ saveCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
-\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{void}\ saveFifoCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
-\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{void}\ saveQueueCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
-\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordtype}{void}\ saveNetworkCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
-\DoxyCodeLine{00046\ }
-\DoxyCodeLine{00047\ \textcolor{keyword}{private}:}
-\DoxyCodeLine{00048\ \ \ \ \ std::vector<TimingSample>\ samples;}
-\DoxyCodeLine{00049\ \ \ \ \ std::vector<FifoSample>\ fifoSamples;}
-\DoxyCodeLine{00050\ \ \ \ \ std::vector<QueueLatencySample>\ queueSamples;}
-\DoxyCodeLine{00051\ \ \ \ \ std::vector<NetworkJitterSample>\ networkSamples;}
-\DoxyCodeLine{00052\ \ \ \ \ std::mutex\ mutex;}
-\DoxyCodeLine{00053\ \};}
-\DoxyCodeLine{00054\ }
-\DoxyCodeLine{00055\ \textcolor{keyword}{extern}\ \mbox{\hyperlink{classTimingLogger}{TimingLogger}}\ gTimingLogger;}
+\DoxyCodeLine{00042\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classTimingLogger}{TimingLogger}}\ \{}
+\DoxyCodeLine{00043\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{void}\ add(\textcolor{keyword}{const}\ std::string\&\ stage,\ uint64\_t\ block,\ uint64\_t\ latencyNs);}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordtype}{void}\ addFifoSample(\textcolor{keyword}{const}\ \mbox{\hyperlink{structFifoSample}{FifoSample}}\&\ s);}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{void}\ addQueueLatency(\textcolor{keyword}{const}\ \mbox{\hyperlink{structQueueLatencySample}{QueueLatencySample}}\&\ s);}
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordtype}{void}\ addNetworkJitter(\textcolor{keyword}{const}\ \mbox{\hyperlink{structNetworkJitterSample}{NetworkJitterSample}}\&\ s);}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}\ addDropSample(\textcolor{keyword}{const}\ \mbox{\hyperlink{structDropSample}{DropSample}}\&\ s);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{void}\ saveCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
+\DoxyCodeLine{00052\ \ \ \ \ \textcolor{keywordtype}{void}\ saveFifoCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keywordtype}{void}\ saveQueueCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordtype}{void}\ saveNetworkCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keywordtype}{void}\ saveDropCSV(\textcolor{keyword}{const}\ std::string\&\ filename);}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00058\ \ \ \ \ std::vector<TimingSample>\ samples;}
+\DoxyCodeLine{00059\ \ \ \ \ std::vector<FifoSample>\ fifoSamples;}
+\DoxyCodeLine{00060\ \ \ \ \ std::vector<QueueLatencySample>\ queueSamples;}
+\DoxyCodeLine{00061\ \ \ \ \ std::vector<NetworkJitterSample>\ networkSamples;}
+\DoxyCodeLine{00062\ \ \ \ \ std::vector<DropSample>\ dropSamples;}
+\DoxyCodeLine{00063\ \ \ \ \ std::mutex\ mutex;}
+\DoxyCodeLine{00064\ \};}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \textcolor{keyword}{extern}\ \mbox{\hyperlink{classTimingLogger}{TimingLogger}}\ gTimingLogger;}
 
 \end{DoxyCode}
