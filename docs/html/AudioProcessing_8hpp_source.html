@@ -20,7 +20,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="logo-stacked.png"/></td>
+  <td id="projectlogo"><img alt="Logo" src="logo-stacked small.png"/></td>
   <td id="projectalign">
    <div id="projectname">Real time Conferencing
    </div>
@@ -107,11 +107,15 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="classAudioProcessing.html#a0382f22329f46503535ec401a92116c4">   56</a></span>    std::vector&lt;float&gt; <a class="code hl_function" href="classAudioProcessing.html#a0382f22329f46503535ec401a92116c4">audioDecoding</a>(</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="keyword">const</span> std::vector&lt;float&gt;&amp; input</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    );</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>};</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="classAudioProcessing.html#a45539d4e741eba2c9a2f0d6805ec2359">   65</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classAudioProcessing.html#a45539d4e741eba2c9a2f0d6805ec2359">HeavyLoop</a>(<span class="keywordtype">int</span> loop_size</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    );</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>};</div>
 </div>
 <div class="ttc" id="aclassAudioProcessing_html"><div class="ttname"><a href="classAudioProcessing.html">AudioProcessing</a></div><div class="ttdoc">Provides basic audio processing functions.</div><div class="ttdef"><b>Definition</b> AudioProcessing.hpp:9</div></div>
 <div class="ttc" id="aclassAudioProcessing_html_a0382f22329f46503535ec401a92116c4"><div class="ttname"><a href="classAudioProcessing.html#a0382f22329f46503535ec401a92116c4">AudioProcessing::audioDecoding</a></div><div class="ttdeci">std::vector&lt; float &gt; audioDecoding(const std::vector&lt; float &gt; &amp;input)</div><div class="ttdoc">Applies simple audio decoding.</div></div>
 <div class="ttc" id="aclassAudioProcessing_html_a0c8498c268314270ab6a2ff7af2b30fc"><div class="ttname"><a href="classAudioProcessing.html#a0c8498c268314270ab6a2ff7af2b30fc">AudioProcessing::audioEncoding</a></div><div class="ttdeci">std::vector&lt; float &gt; audioEncoding(const std::vector&lt; float &gt; &amp;input)</div><div class="ttdoc">Applies simple audio encoding.</div></div>
+<div class="ttc" id="aclassAudioProcessing_html_a45539d4e741eba2c9a2f0d6805ec2359"><div class="ttname"><a href="classAudioProcessing.html#a45539d4e741eba2c9a2f0d6805ec2359">AudioProcessing::HeavyLoop</a></div><div class="ttdeci">static void HeavyLoop(int loop_size)</div><div class="ttdoc">Applies simple heavy loop processing.</div></div>
 <div class="ttc" id="aclassAudioProcessing_html_ae53c78e330851ea0e21c9ab1ebb25122"><div class="ttname"><a href="classAudioProcessing.html#ae53c78e330851ea0e21c9ab1ebb25122">AudioProcessing::echoCancellation</a></div><div class="ttdeci">std::vector&lt; float &gt; echoCancellation(const std::vector&lt; float &gt; &amp;input, int delaySamples, float decay)</div><div class="ttdoc">Applies simple echo cancellation.</div></div>
 <div class="ttc" id="aclassAudioProcessing_html_aee43a91eea9cfd9dd6ccf67b8cd314a1"><div class="ttname"><a href="classAudioProcessing.html#aee43a91eea9cfd9dd6ccf67b8cd314a1">AudioProcessing::lowPass</a></div><div class="ttdeci">std::vector&lt; float &gt; lowPass(const std::vector&lt; float &gt; &amp;input, float alpha)</div><div class="ttdoc">Applies a simple first-order low-pass filter.</div></div>
 </div><!-- fragment --></div><!-- contents -->

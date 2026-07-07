@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['isbuttonpressed_0',['isButtonPressed',['../classUserInterface.html#acbace71d0acf0bf5a6a18ac2909af996',1,'UserInterface']]]
+  ['heavyloop_0',['HeavyLoop',['../classAudioProcessing.html#a45539d4e741eba2c9a2f0d6805ec2359',1,'AudioProcessing']]]
 ];

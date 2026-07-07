@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['networkjittersample_0',['NetworkJitterSample',['../structNetworkJitterSample.html',1,'']]]
+  ['lowpass_0',['lowPass',['../classAudioProcessing.html#aee43a91eea9cfd9dd6ccf67b8cd314a1',1,'AudioProcessing']]]
 ];

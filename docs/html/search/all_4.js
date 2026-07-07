@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lowpass_0',['lowPass',['../classAudioProcessing.html#aee43a91eea9cfd9dd6ccf67b8cd314a1',1,'AudioProcessing']]]
+  ['heavyloop_0',['HeavyLoop',['../classAudioProcessing.html#a45539d4e741eba2c9a2f0d6805ec2359',1,'AudioProcessing']]]
 ];

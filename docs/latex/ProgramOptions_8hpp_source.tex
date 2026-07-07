@@ -1,0 +1,22 @@
+\doxysection{Program\+Options.\+hpp}
+\hypertarget{ProgramOptions_8hpp_source}{}\label{ProgramOptions_8hpp_source}\index{include/ProgramOptions.hpp@{include/ProgramOptions.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ <string>}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structProgramOptions}{ProgramOptions}}\ \{}
+\DoxyCodeLine{00006\ \ \ \ \ \textcolor{keywordtype}{bool}\ simulationMode\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00007\ \ \ \ \ std::string\ udpGroup\ =\ \textcolor{stringliteral}{"{}192.168.50.189"{}};}
+\DoxyCodeLine{00008\ \ \ \ \ \textcolor{keywordtype}{bool}\ useUdp\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00009\ \ \ \ \ \textcolor{keywordtype}{bool}\ userSpecifiedUdp\ =\ \textcolor{keyword}{false};}
+\DoxyCodeLine{00010\ \ \ \ \ \textcolor{keywordtype}{bool}\ useProcessing\ =\ \textcolor{keyword}{true};}
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \ \ \ \ \textcolor{keywordtype}{int}\ audioMs\ =\ 10;}
+\DoxyCodeLine{00013\ \ \ \ \ \textcolor{keywordtype}{int}\ splitDivisor\ =\ 10;}
+\DoxyCodeLine{00014\ \};}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \mbox{\hyperlink{structProgramOptions}{ProgramOptions}}\ parseArguments(\textcolor{keywordtype}{int}\ argc,\ \textcolor{keywordtype}{char}*\ argv[]);}
+
+\end{DoxyCode}

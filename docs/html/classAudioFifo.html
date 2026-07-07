@@ -20,7 +20,7 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr id="projectrow">
-  <td id="projectlogo"><img alt="Logo" src="logo-stacked.png"/></td>
+  <td id="projectlogo"><img alt="Logo" src="logo-stacked small.png"/></td>
   <td id="projectalign">
    <div id="projectname">Real time Conferencing
    </div>
@@ -84,9 +84,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a904c6ec6dddb90f318c4da6b223d0ee8" id="r_a904c6ec6dddb90f318c4da6b223d0ee8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAudioFifo.html#a904c6ec6dddb90f318c4da6b223d0ee8">AudioFifo</a> (size_t capacity=FIFO_SIZE)</td></tr>
-<tr class="memdesc:a904c6ec6dddb90f318c4da6b223d0ee8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs an empty audio FIFO.  <br /></td></tr>
-<tr class="separator:a904c6ec6dddb90f318c4da6b223d0ee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4be9c37ac591c27d18d9b5c30c46b9d5" id="r_a4be9c37ac591c27d18d9b5c30c46b9d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAudioFifo.html#a4be9c37ac591c27d18d9b5c30c46b9d5">AudioFifo</a> (size_t capacity=FIFO_SIZE, const std::string &amp;name=&quot;fifo&quot;)</td></tr>
+<tr class="memdesc:a4be9c37ac591c27d18d9b5c30c46b9d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs an empty audio FIFO.  <br /></td></tr>
+<tr class="separator:a4be9c37ac591c27d18d9b5c30c46b9d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25bfaba840cb0c77c4df145384ef287b" id="r_a25bfaba840cb0c77c4df145384ef287b"><td class="memItemLeft" align="right" valign="top"><a id="a25bfaba840cb0c77c4df145384ef287b" name="a25bfaba840cb0c77c4df145384ef287b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>~AudioFifo</b> ()</td></tr>
 <tr class="memdesc:a25bfaba840cb0c77c4df145384ef287b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys the audio FIFO and releases synchronization resources. <br /></td></tr>
@@ -108,8 +108,8 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Thread-safe FIFO queue for audio blocks. </p>
 <p><a class="el" href="classAudioFifo.html" title="Thread-safe FIFO queue for audio blocks.">AudioFifo</a> stores timestamped audio blocks (capture time + samples). It is intended for producer/consumer use, for example one thread recording audio and another thread playing it back. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a904c6ec6dddb90f318c4da6b223d0ee8" name="a904c6ec6dddb90f318c4da6b223d0ee8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a904c6ec6dddb90f318c4da6b223d0ee8">&#9670;&#160;</a></span>AudioFifo()</h2>
+<a id="a4be9c37ac591c27d18d9b5c30c46b9d5" name="a4be9c37ac591c27d18d9b5c30c46b9d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4be9c37ac591c27d18d9b5c30c46b9d5">&#9670;&#160;</a></span>AudioFifo()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -118,8 +118,18 @@ Public Member Functions</h2></td></tr>
           <td class="memname">AudioFifo::AudioFifo </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>capacity</em> = <code>FIFO_SIZE</code></td><td>)</td>
+          <td class="paramname"><em>capacity</em> = <code>FIFO_SIZE</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;fifo&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">

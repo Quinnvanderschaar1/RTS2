@@ -1,0 +1,62 @@
+\doxysection{Application Class Reference}
+\hypertarget{classApplication}{}\label{classApplication}\index{Application@{Application}}
+
+
+Main conferencing application controller.  
+
+
+
+
+{\ttfamily \#include $<$Application.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classApplication_a64855afa8198b321df9482adb904addf}{Application}} (\mbox{\hyperlink{structProgramOptions}{Program\+Options}} options)
+\begin{DoxyCompactList}\small\item\em Constructs the application with parsed program options. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{classApplication_a8cf8941c8db90117d3735bce5ae1fdf4}{run}} ()
+\begin{DoxyCompactList}\small\item\em Runs the conferencing application. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Main conferencing application controller. 
+
+The \doxylink{classApplication}{Application} class owns the high-\/level runtime flow of the program\+: audio configuration, startup logging, device/simulation setup, thread creation, thread joining, and shutdown cleanup. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classApplication_a64855afa8198b321df9482adb904addf}\label{classApplication_a64855afa8198b321df9482adb904addf} 
+\index{Application@{Application}!Application@{Application}}
+\index{Application@{Application}!Application@{Application}}
+\doxysubsubsection{\texorpdfstring{Application()}{Application()}}
+{\footnotesize\ttfamily Application\+::\+Application (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structProgramOptions}{Program\+Options}}}]{options }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs the application with parsed program options. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em options} & Runtime configuration parsed from command-\/line arguments. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classApplication_a8cf8941c8db90117d3735bce5ae1fdf4}\label{classApplication_a8cf8941c8db90117d3735bce5ae1fdf4} 
+\index{Application@{Application}!run@{run}}
+\index{run@{run}!Application@{Application}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily int Application\+::run (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Runs the conferencing application. 
+
+\begin{DoxyReturn}{Returns}
+0 on successful termination, non-\/zero on startup/configuration error. 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Application.\+hpp\end{DoxyCompactItemize}

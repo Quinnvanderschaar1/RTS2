@@ -12,7 +12,7 @@ Thread-\/safe FIFO queue for audio blocks.
 \doxysubsubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{classAudioFifo_a904c6ec6dddb90f318c4da6b223d0ee8}{Audio\+Fifo}} (size\+\_\+t capacity=FIFO\+\_\+\+SIZE)
+\mbox{\hyperlink{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5}{Audio\+Fifo}} (size\+\_\+t capacity=FIFO\+\_\+\+SIZE, const std\+::string \&name="{}fifo"{})
 \begin{DoxyCompactList}\small\item\em Constructs an empty audio FIFO. \end{DoxyCompactList}\item 
 \Hypertarget{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b}\label{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b} 
 {\bfseries \texorpdfstring{$\sim$}{\string~}\+Audio\+Fifo} ()
@@ -33,11 +33,11 @@ Thread-\/safe FIFO queue for audio blocks.
 \doxylink{classAudioFifo}{Audio\+Fifo} stores timestamped audio blocks (capture time + samples). It is intended for producer/consumer use, for example one thread recording audio and another thread playing it back. 
 
 \doxysubsection{Constructor \& Destructor Documentation}
-\Hypertarget{classAudioFifo_a904c6ec6dddb90f318c4da6b223d0ee8}\label{classAudioFifo_a904c6ec6dddb90f318c4da6b223d0ee8} 
+\Hypertarget{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5}\label{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5} 
 \index{AudioFifo@{AudioFifo}!AudioFifo@{AudioFifo}}
 \index{AudioFifo@{AudioFifo}!AudioFifo@{AudioFifo}}
 \doxysubsubsection{\texorpdfstring{AudioFifo()}{AudioFifo()}}
-{\footnotesize\ttfamily Audio\+Fifo\+::\+Audio\+Fifo (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{capacity = {\ttfamily FIFO\+\_\+SIZE} }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily Audio\+Fifo\+::\+Audio\+Fifo (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{capacity = {\ttfamily FIFO\+\_\+SIZE},  }\item[{const std\+::string \&}]{name = {\ttfamily "{}fifo"{}} }\end{DoxyParamCaption})}
 
 
 

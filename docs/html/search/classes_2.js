@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['networkjittersample_0',['NetworkJitterSample',['../structNetworkJitterSample.html',1,'']]]
+  ['fifosample_0',['FifoSample',['../structFifoSample.html',1,'']]]
 ];
