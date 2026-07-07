@@ -1,0 +1,40 @@
+\doxysection{Processing\+Threads.\+hpp}
+\hypertarget{ProcessingThreads_8hpp_source}{}\label{ProcessingThreads_8hpp_source}\index{include/ProcessingThreads.hpp@{include/ProcessingThreads.hpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}AudioFifo.hpp"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}AudioProcessing.hpp"{}}}
+\DoxyCodeLine{00005\ }
+\DoxyCodeLine{00011\ \textcolor{keywordtype}{void}\ lowPassThreadLoop(}
+\DoxyCodeLine{00012\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ source,}
+\DoxyCodeLine{00013\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ destination,}
+\DoxyCodeLine{00014\ \ \ \ \ \mbox{\hyperlink{classAudioProcessing}{AudioProcessing}}\&\ processing,}
+\DoxyCodeLine{00015\ \ \ \ \ \textcolor{keywordtype}{float}\ alpha}
+\DoxyCodeLine{00016\ );}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00023\ \textcolor{keywordtype}{void}\ echoCancelThreadLoop(}
+\DoxyCodeLine{00024\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ source,}
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ destination,}
+\DoxyCodeLine{00026\ \ \ \ \ \mbox{\hyperlink{classAudioProcessing}{AudioProcessing}}\&\ processing,}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keywordtype}{int}\ delaySamples,}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keywordtype}{float}\ decay}
+\DoxyCodeLine{00029\ );}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00036\ \textcolor{keywordtype}{void}\ audioEncoderThreadLoop(}
+\DoxyCodeLine{00037\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ source,}
+\DoxyCodeLine{00038\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ destination,}
+\DoxyCodeLine{00039\ \ \ \ \ \mbox{\hyperlink{classAudioProcessing}{AudioProcessing}}\&\ processing}
+\DoxyCodeLine{00040\ );}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00047\ \textcolor{keywordtype}{void}\ audioDecoderThreadLoop(}
+\DoxyCodeLine{00048\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ source,}
+\DoxyCodeLine{00049\ \ \ \ \ \mbox{\hyperlink{classAudioFifo}{AudioFifo}}\&\ destination,}
+\DoxyCodeLine{00050\ \ \ \ \ \mbox{\hyperlink{classAudioProcessing}{AudioProcessing}}\&\ processing}
+\DoxyCodeLine{00051\ );}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{keywordtype}{void}\ HeavyLoopThreadLoop(\ \textcolor{keywordtype}{int}\ loop\_size}
+\DoxyCodeLine{00054\ );}
+
+\end{DoxyCode}

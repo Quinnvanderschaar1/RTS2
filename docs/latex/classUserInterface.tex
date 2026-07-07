@@ -1,0 +1,84 @@
+\doxysection{User\+Interface Class Reference}
+\hypertarget{classUserInterface}{}\label{classUserInterface}\index{UserInterface@{UserInterface}}
+
+
+Simple GPIO user interface for reading a button and writing an LED.  
+
+
+
+
+{\ttfamily \#include $<$User\+Interface.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classUserInterface_a647331ba6df28404d9501c4586c5420b}{User\+Interface}} (int button\+Gpio, int led\+Gpio)
+\begin{DoxyCompactList}\small\item\em Constructs the user interface. \end{DoxyCompactList}\item 
+\Hypertarget{classUserInterface_ae588b2ff1711a016dd4c6fc5002c0841}\label{classUserInterface_ae588b2ff1711a016dd4c6fc5002c0841} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+User\+Interface} ()
+\begin{DoxyCompactList}\small\item\em Destroys the user interface and unexports GPIOs. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classUserInterface_acbace71d0acf0bf5a6a18ac2909af996}{is\+Button\+Pressed}} ()
+\begin{DoxyCompactList}\small\item\em Reads the button state. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classUserInterface_a317f3c0d5901d6a05f26253fbc71aadc}{set\+Led}} (bool on)
+\begin{DoxyCompactList}\small\item\em Sets the LED state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Simple GPIO user interface for reading a button and writing an LED. 
+
+This class uses the Linux sysfs GPIO interface. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classUserInterface_a647331ba6df28404d9501c4586c5420b}\label{classUserInterface_a647331ba6df28404d9501c4586c5420b} 
+\index{UserInterface@{UserInterface}!UserInterface@{UserInterface}}
+\index{UserInterface@{UserInterface}!UserInterface@{UserInterface}}
+\doxysubsubsection{\texorpdfstring{UserInterface()}{UserInterface()}}
+{\footnotesize\ttfamily User\+Interface\+::\+User\+Interface (\begin{DoxyParamCaption}\item[{int}]{button\+Gpio,  }\item[{int}]{led\+Gpio }\end{DoxyParamCaption})}
+
+
+
+Constructs the user interface. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em button\+Gpio} & GPIO number connected to the button. \\
+\hline
+{\em led\+Gpio} & GPIO number connected to the LED. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classUserInterface_acbace71d0acf0bf5a6a18ac2909af996}\label{classUserInterface_acbace71d0acf0bf5a6a18ac2909af996} 
+\index{UserInterface@{UserInterface}!isButtonPressed@{isButtonPressed}}
+\index{isButtonPressed@{isButtonPressed}!UserInterface@{UserInterface}}
+\doxysubsubsection{\texorpdfstring{isButtonPressed()}{isButtonPressed()}}
+{\footnotesize\ttfamily bool User\+Interface\+::is\+Button\+Pressed (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Reads the button state. 
+
+\begin{DoxyReturn}{Returns}
+true if button is pressed, false otherwise. 
+\end{DoxyReturn}
+\Hypertarget{classUserInterface_a317f3c0d5901d6a05f26253fbc71aadc}\label{classUserInterface_a317f3c0d5901d6a05f26253fbc71aadc} 
+\index{UserInterface@{UserInterface}!setLed@{setLed}}
+\index{setLed@{setLed}!UserInterface@{UserInterface}}
+\doxysubsubsection{\texorpdfstring{setLed()}{setLed()}}
+{\footnotesize\ttfamily void User\+Interface\+::set\+Led (\begin{DoxyParamCaption}\item[{bool}]{on }\end{DoxyParamCaption})}
+
+
+
+Sets the LED state. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em on} & true turns LED on, false turns LED off. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/User\+Interface.\+hpp\end{DoxyCompactItemize}

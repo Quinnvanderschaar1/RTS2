@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AudioFifo.hpp"
+#include "wcet.hpp"
 #include <portaudio.h>
 
 /**
@@ -22,6 +23,16 @@ private:
      */
     PaStream* stream = nullptr;
 
+    /**
+     * @brief Optional end-to-end statistics collector.
+     */
+    WCETStats* e2eStats = nullptr;
+
+    /**
+     * @brief Count of audio blocks processed.
+     */
+    uint64_t blockCount = 0;
+
 public:
     /**
      * @brief Constructs an AudioPlayer.
@@ -30,6 +41,8 @@ public:
      */
     explicit AudioPlayer(AudioFifo& fifo);
 
+    explicit AudioPlayer(AudioFifo& fifo, WCETStats* e2eStats);
+
     /**
      * @brief Starts the playback loop.
      *
@@ -37,4 +50,15 @@ public:
      * audio blocks received from the FIFO.
      */
     void start();
+
+private:
+    static int playCallback(
+        const void* inputBuffer,
+        void* outputBuffer,
+        unsigned long framesPerBuffer,
+        const PaStreamCallbackTimeInfo* timeInfo,
+        PaStreamCallbackFlags statusFlags,
+        void* userData
+    );
+    int fillOutput(float* outputBuffer, unsigned long framesPerBuffer);
 };

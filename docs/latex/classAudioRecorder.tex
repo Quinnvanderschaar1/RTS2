@@ -1,0 +1,62 @@
+\doxysection{Audio\+Recorder Class Reference}
+\hypertarget{classAudioRecorder}{}\label{classAudioRecorder}\index{AudioRecorder@{AudioRecorder}}
+
+
+Audio recording class using Port\+Audio.  
+
+
+
+
+{\ttfamily \#include $<$Audio\+Recorder.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAudioRecorder_a7adc395c4cafc412f22b3364d8b79ad9}{Audio\+Recorder}} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo)
+\begin{DoxyCompactList}\small\item\em Constructs an \doxylink{classAudioRecorder}{Audio\+Recorder}. \end{DoxyCompactList}\item 
+\Hypertarget{classAudioRecorder_a2822331c040a3918048493c67cff1b8a}\label{classAudioRecorder_a2822331c040a3918048493c67cff1b8a} 
+{\bfseries Audio\+Recorder} (\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&fifo, \mbox{\hyperlink{structWCETStats}{WCETStats}} \texorpdfstring{$\ast$}{*}e2e\+Stats)
+\item 
+void \mbox{\hyperlink{classAudioRecorder_a92c5f630b16c5ea570297567d5cd9baf}{start}} ()
+\begin{DoxyCompactList}\small\item\em Starts the recording loop. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Audio recording class using Port\+Audio. 
+
+\doxylink{classAudioRecorder}{Audio\+Recorder} continuously captures audio from the default input device and pushes 10 ms audio blocks into an \doxylink{classAudioFifo}{Audio\+Fifo}. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classAudioRecorder_a7adc395c4cafc412f22b3364d8b79ad9}\label{classAudioRecorder_a7adc395c4cafc412f22b3364d8b79ad9} 
+\index{AudioRecorder@{AudioRecorder}!AudioRecorder@{AudioRecorder}}
+\index{AudioRecorder@{AudioRecorder}!AudioRecorder@{AudioRecorder}}
+\doxysubsubsection{\texorpdfstring{AudioRecorder()}{AudioRecorder()}}
+{\footnotesize\ttfamily Audio\+Recorder\+::\+Audio\+Recorder (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classAudioFifo}{Audio\+Fifo}} \&}]{fifo }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Constructs an \doxylink{classAudioRecorder}{Audio\+Recorder}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fifo} & Reference to the audio FIFO used to store recorded audio. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioRecorder_a92c5f630b16c5ea570297567d5cd9baf}\label{classAudioRecorder_a92c5f630b16c5ea570297567d5cd9baf} 
+\index{AudioRecorder@{AudioRecorder}!start@{start}}
+\index{start@{start}!AudioRecorder@{AudioRecorder}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily void Audio\+Recorder\+::start (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Starts the recording loop. 
+
+Opens the Port\+Audio input stream and continuously records audio blocks into the FIFO. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Audio\+Recorder.\+hpp\end{DoxyCompactItemize}

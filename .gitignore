@@ -1,4 +1,3 @@
-RTS2/build
-build
-.gitignore
+RTS2/build/
+build/
 main

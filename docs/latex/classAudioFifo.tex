@@ -1,0 +1,108 @@
+\doxysection{Audio\+Fifo Class Reference}
+\hypertarget{classAudioFifo}{}\label{classAudioFifo}\index{AudioFifo@{AudioFifo}}
+
+
+Thread-\/safe FIFO queue for audio blocks.  
+
+
+
+
+{\ttfamily \#include $<$Audio\+Fifo.\+hpp$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5}{Audio\+Fifo}} (size\+\_\+t capacity=FIFO\+\_\+\+SIZE, const std\+::string \&name="{}fifo"{})
+\begin{DoxyCompactList}\small\item\em Constructs an empty audio FIFO. \end{DoxyCompactList}\item 
+\Hypertarget{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b}\label{classAudioFifo_a25bfaba840cb0c77c4df145384ef287b} 
+{\bfseries \texorpdfstring{$\sim$}{\string~}\+Audio\+Fifo} ()
+\begin{DoxyCompactList}\small\item\em Destroys the audio FIFO and releases synchronization resources. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classAudioFifo_aac4aafc6af6d5eec02b5bd7c9aecabe2}{push}} (\mbox{\hyperlink{structAudioBlock}{Audio\+Block}} block)
+\begin{DoxyCompactList}\small\item\em Pushes an audio block into the FIFO. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structAudioBlock}{Audio\+Block}} \mbox{\hyperlink{classAudioFifo_aee80829576455eb23e8bb9811d7ed9a1}{pop}} ()
+\begin{DoxyCompactList}\small\item\em Removes and returns the oldest audio block from the FIFO. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classAudioFifo_acd64fb9dec68dc0830e488004cb6b8e7}{try\+Push}} (\mbox{\hyperlink{structAudioBlock}{Audio\+Block}} block, bool log=true)
+\begin{DoxyCompactList}\small\item\em Tries to push a block into the FIFO without blocking. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classAudioFifo_ac7f9e696213dcca2aef62bb532790746}{try\+Pop}} (\mbox{\hyperlink{structAudioBlock}{Audio\+Block}} \&block, bool log=true)
+\begin{DoxyCompactList}\small\item\em Tries to pop a block from the FIFO without blocking. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Thread-\/safe FIFO queue for audio blocks. 
+
+\doxylink{classAudioFifo}{Audio\+Fifo} stores timestamped audio blocks (capture time + samples). It is intended for producer/consumer use, for example one thread recording audio and another thread playing it back. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5}\label{classAudioFifo_a4be9c37ac591c27d18d9b5c30c46b9d5} 
+\index{AudioFifo@{AudioFifo}!AudioFifo@{AudioFifo}}
+\index{AudioFifo@{AudioFifo}!AudioFifo@{AudioFifo}}
+\doxysubsubsection{\texorpdfstring{AudioFifo()}{AudioFifo()}}
+{\footnotesize\ttfamily Audio\+Fifo\+::\+Audio\+Fifo (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{capacity = {\ttfamily FIFO\+\_\+SIZE},  }\item[{const std\+::string \&}]{name = {\ttfamily "{}fifo"{}} }\end{DoxyParamCaption})}
+
+
+
+Constructs an empty audio FIFO. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em capacity} & Maximum number of blocks to buffer. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{classAudioFifo_aee80829576455eb23e8bb9811d7ed9a1}\label{classAudioFifo_aee80829576455eb23e8bb9811d7ed9a1} 
+\index{AudioFifo@{AudioFifo}!pop@{pop}}
+\index{pop@{pop}!AudioFifo@{AudioFifo}}
+\doxysubsubsection{\texorpdfstring{pop()}{pop()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structAudioBlock}{Audio\+Block}} Audio\+Fifo\+::pop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Removes and returns the oldest audio block from the FIFO. 
+
+This function blocks until audio data is available.
+
+\begin{DoxyReturn}{Returns}
+The oldest audio block in the queue. 
+\end{DoxyReturn}
+\Hypertarget{classAudioFifo_aac4aafc6af6d5eec02b5bd7c9aecabe2}\label{classAudioFifo_aac4aafc6af6d5eec02b5bd7c9aecabe2} 
+\index{AudioFifo@{AudioFifo}!push@{push}}
+\index{push@{push}!AudioFifo@{AudioFifo}}
+\doxysubsubsection{\texorpdfstring{push()}{push()}}
+{\footnotesize\ttfamily void Audio\+Fifo\+::push (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structAudioBlock}{Audio\+Block}}}]{block }\end{DoxyParamCaption})}
+
+
+
+Pushes an audio block into the FIFO. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em block} & Audio block to add to the queue. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{classAudioFifo_ac7f9e696213dcca2aef62bb532790746}\label{classAudioFifo_ac7f9e696213dcca2aef62bb532790746} 
+\index{AudioFifo@{AudioFifo}!tryPop@{tryPop}}
+\index{tryPop@{tryPop}!AudioFifo@{AudioFifo}}
+\doxysubsubsection{\texorpdfstring{tryPop()}{tryPop()}}
+{\footnotesize\ttfamily bool Audio\+Fifo\+::try\+Pop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structAudioBlock}{Audio\+Block}} \&}]{block,  }\item[{bool}]{log = {\ttfamily true} }\end{DoxyParamCaption})}
+
+
+
+Tries to pop a block from the FIFO without blocking. 
+
+Returns false if no block is available or if the lock is unavailable. \Hypertarget{classAudioFifo_acd64fb9dec68dc0830e488004cb6b8e7}\label{classAudioFifo_acd64fb9dec68dc0830e488004cb6b8e7} 
+\index{AudioFifo@{AudioFifo}!tryPush@{tryPush}}
+\index{tryPush@{tryPush}!AudioFifo@{AudioFifo}}
+\doxysubsubsection{\texorpdfstring{tryPush()}{tryPush()}}
+{\footnotesize\ttfamily bool Audio\+Fifo\+::try\+Push (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structAudioBlock}{Audio\+Block}}}]{block,  }\item[{bool}]{log = {\ttfamily true} }\end{DoxyParamCaption})}
+
+
+
+Tries to push a block into the FIFO without blocking. 
+
+Returns false if the FIFO is full or if the lock is unavailable. 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/Audio\+Fifo.\+hpp\end{DoxyCompactItemize}
